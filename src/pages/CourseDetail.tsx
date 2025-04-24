@@ -19,7 +19,8 @@ interface SanityCourseDetail {
   students?: number;
   rating?: number;
   price?: number;
-  category?: string;
+  category?: any;
+  categoryName?: string;
   longDescription?: any[];
   modules?: Array<{ _key: string; title: string; description?: string }>;
 }
@@ -67,6 +68,7 @@ const CourseDetail = () => {
           rating,
           price,
           category,
+          "categoryName": category->title,
           longDescription,
           modules[]{
             _key,
@@ -156,9 +158,9 @@ const CourseDetail = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                {course.category && (
+                {course.categoryName && (
                   <span className="inline-block bg-blue-600 text-white text-sm font-semibold px-3 py-1 rounded-full mb-3">
-                    {course.category}
+                    {course.categoryName}
                   </span>
                 )}
                 <h1 className="text-3xl md:text-4xl font-bold mb-2">
@@ -203,7 +205,7 @@ const CourseDetail = () => {
             <AnimatedSection>
               {course.longDescription ? (
                  <div className="prose prose-lg dark:prose-invert max-w-none mb-6">
-                   <h2 className="text-xl font-bold mb-3">About This Course</h2>
+                   <h2 className="text-xl font-bold mb-3 text-gray-800 dark:text-white">About This Course</h2>
                    <PortableText value={course.longDescription} components={ptComponents} />
                  </div>
               ) : (
@@ -213,7 +215,7 @@ const CourseDetail = () => {
               {course.price !== undefined && course.price !== null && (
                 <div className="flex justify-between items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg mb-6">
                   <div className="font-bold text-2xl text-blue-600 dark:text-blue-400">
-                    ${course.price.toFixed(2)}
+                    ₹{course.price.toFixed(2)}
                   </div>
                   <Button variant="primary" size="lg">
                     Enroll Now

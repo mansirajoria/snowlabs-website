@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import ContactPopup from './ContactPopup';
 import { useDarkMode } from 'usehooks-ts';
 
 interface LayoutProps {
@@ -26,6 +27,7 @@ const Layout: React.FC<LayoutProps> = ({
       <Navbar />
       <main className="flex-grow">{children}</main>
       <Footer />
+      <ContactPopup />
     </div>
   );
 };

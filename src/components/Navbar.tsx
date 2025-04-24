@@ -75,8 +75,15 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link to="/" className="text-2xl font-bold">
-              SnowLabs
+            <Link to="/" className="flex items-center space-x-3">
+              <img 
+                src="/logo/logo.png" 
+                alt="SnowLabs Logo" 
+                className="h-10 w-auto" // Adjust height as needed
+              />
+              <span className="text-2xl font-bold text-gray-800 dark:text-white">
+                SnowLabs
+              </span>
             </Link>
           </div>
 
@@ -151,10 +158,16 @@ const Navbar = () => {
 
             {/* Get Started Button */}
             <Button 
-              to="/get-started" 
-              variant={'primary'} 
+              to="/contact" 
+              variant="primary"
               size="sm"
-              className={`${getStartedButtonSolidClass} ml-2`} // Added margin
+              className={`${getStartedButtonSolidClass} ml-2`}
+              onClick={() => {
+                window.scrollTo({
+                  top: 0,
+                  behavior: 'smooth'
+                });
+              }}
             >
               Get Started
             </Button>

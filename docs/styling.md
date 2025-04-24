@@ -42,3 +42,8 @@ Page transitions and component entrance animations are primarily handled using t
 
 -   **Page Transitions:** `AnimatePresence` is used in `src/App.tsx` to manage transitions between routes.
 -   **Component Animations:** `motion` components (e.g., `motion.div`) are used within components (like `AnimatedSection.tsx`, `ContactForm.tsx`, pages) to define initial, animate, and transition properties. 
+
+## Z-Index Management
+
+-   For layered components like modals or popups, ensure appropriate `z-index` values are used.
+    -   The `ContactPopup.tsx` uses `z-[100]` to ensure it appears above the `Navbar` (which typically has `z-50`). 

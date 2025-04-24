@@ -15,4 +15,13 @@ This document describes integrations with external APIs used within the SnowLabs
     6.  **Response Handling:**
         -   If the `fetch` request is successful (response status is OK), the form state is cleared, and the status is set to `'success'` to display a confirmation message.
         -   If the response status is not OK, or if a network error occurs during the `fetch`, the error is logged to the console, and the form status is set to `'error'` to display an error message.
--   **Setup:** Requires creating a form on [Formspree.io](https://formspree.io/) and adding its unique endpoint URL to the `.env` file. 
+-   **Setup:** Requires creating a form on [Formspree.io](https://formspree.io/) and adding its unique endpoint URL to the `.env` file.
+
+## Formspree (Contact Popup)
+
+-   **Purpose:** Handles submissions from the contact popup modal.
+-   **Integration Point:** `src/components/ContactPopup.tsx`
+-   **Mechanism:** Similar to the main contact form, but with a simpler set of fields (name, email, message).
+    -   Submits data to the same `VITE_FORMSPREE_ENDPOINT`.
+    -   Crucially, it adds a `_source: 'popup_form'` field to the submitted data, allowing differentiation of leads generated via the popup versus the main contact page.
+-   **Setup:** Uses the same Formspree endpoint configured for the main contact form. 

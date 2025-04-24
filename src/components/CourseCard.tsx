@@ -92,7 +92,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
           </div>
         </div>
         <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
-          <div className="font-bold text-lg text-gray-900 dark:text-white">${course.price.toFixed(2)}</div>
+          <div className="font-bold text-lg text-gray-900 dark:text-white">₹{course.price.toFixed(2)}</div>
           <Button 
             to={`/courses/${course.slug}`} 
             size="sm" 

@@ -6,8 +6,18 @@ This document outlines the main folder structure of the SnowLabs website fronten
 /
 ├── docs/                 # Project documentation
 ├── public/               # Static assets (images, fonts, etc.) directly served
+│   └── popup-image.jpeg  # Image used in the contact popup
 ├── src/
 │   ├── components/       # Reusable React components (e.g., Button, Navbar)
+│   │   ├── Layout.tsx
+│   │   ├── Navbar.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Button.tsx
+│   │   ├── ContactForm.tsx
+│   │   ├── ContactPopup.tsx
+│   │   ├── AnimatedSection.tsx
+│   │   ├── CourseCard.tsx
+│   │   └── ...             # Other components
 │   ├── pages/            # Page-level components corresponding to routes
 │   ├── assets/           # Project-specific assets (icons, images processed by build tool)
 │   ├── styles/           # Global styles or specific CSS modules (if any, currently mainly index.css)
@@ -30,10 +40,10 @@ This document outlines the main folder structure of the SnowLabs website fronten
 ## Key Directories
 
 -   **`docs/`**: Contains all project documentation files in Markdown format.
--   **`public/`**: Static assets placed here are copied directly to the build output root. Use this for assets that don't need processing by the build tool (e.g., `favicon.ico`).
+-   **`public/`**: Static assets placed here are copied directly to the build output root. Use this for assets that don't need processing by the build tool (e.g., `favicon.ico`, `popup-image.jpeg`).
 -   **`src/`**: Contains the main source code of the application.
-    -   **`components/`**: Houses reusable UI components shared across different pages (e.g., `Button.tsx`, `Footer.tsx`, `ContactForm.tsx`).
-    -   **`pages/`**: Contains components that represent entire pages or views, mapped to specific routes (e.g., `Home.tsx`, `About.tsx`).
+    -   **`components/`**: Houses reusable UI components shared across different pages (e.g., `Button.tsx`, `Footer.tsx`, `ContactForm.tsx`, `ContactPopup.tsx`).
+    -   **`pages/`**: Contains components that represent entire pages or views, mapped to specific routes (e.g., `Home.tsx`, `About.tsx`, `CourseDetail.tsx`).
     -   **`assets/`**: For assets like images or icons that are imported and potentially processed by Vite during the build.
     -   **`styles/`**: While most styling is done via Tailwind utility classes, this could hold global styles (`index.css`) or component-specific CSS Modules if needed.
     -   **`App.tsx`**: The root component that sets up the main layout (`Layout.tsx`) and routing using `react-router-dom`.
