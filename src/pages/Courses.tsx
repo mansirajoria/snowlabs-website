@@ -4,47 +4,64 @@ import { SearchIcon, FilterIcon, Loader2 } from 'lucide-react';
 import AnimatedSection from '../components/AnimatedSection';
 import CourseCard, { CourseType } from '../components/CourseCard';
 import client from '../sanityClient';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
-// Define the type for the course data fetched from Sanity
+// Interface for fetched category data
+interface SanityCategory {
+  title: string;
+  slug: string; // Assuming slug is string { current: string }
+}
+
+// Updated SanityCourse interface
 interface SanityCourse {
   _id: string;
   title: string;
-  slug: {
-    current: string;
-  };
+  slug: { current: string };
   shortDescription: string;
   imageUrl: string;
   difficulty: string;
   instructor?: string;
   price?: number;
   duration?: string;
-  rating?: number; // Added optional rating
-  students?: number; // Added optional students
+  rating?: number;
+  students?: number;
+  category?: { // Make category optional initially if some courses might not have it yet
+    title: string;
+    slug: string;
+  };
 }
 
 const Courses = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedLevel, setSelectedLevel] = useState('All');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialSearchTerm = searchParams.get('search') || '';
+  const initialCategory = searchParams.get('category') || 'All'; // Get initial category slug
+  const initialLevel = searchParams.get('level') || 'All';
+
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
+  // Selected category state now stores the SLUG
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedLevel, setSelectedLevel] = useState(initialLevel);
+  
   const [allCourses, setAllCourses] = useState<SanityCourse[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<SanityCourse[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<SanityCategory[]>([]); // State for fetched categories
+  
   const [loading, setLoading] = useState(true);
+  const [loadingCategories, setLoadingCategories] = useState(true); // Loading state for categories
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Hardcoded/Placeholder filter options - replace with dynamic fetching or defined list later
-  // const categories = ['All', 'Web Development', 'Data Science', 'Cloud', 'SAP']; // Example categories
   const levels = ['All', 'Beginner', 'Intermediate', 'Advanced'];
 
-  // Fetch all courses from Sanity on mount
+  // Fetch all courses and categories from Sanity on mount
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchInitialData = async () => {
       setLoading(true);
+      setLoadingCategories(true);
       setError(null);
       try {
-        // Updated GROQ query to fetch rating and students
-        const query = `*[_type == "course"]{
+        // Fetch courses with category info
+        const courseQuery = `*[_type == "course"]{
           _id,
           title,
           slug,
@@ -54,40 +71,76 @@ const Courses = () => {
           instructor,
           price,
           duration,
-          rating, 
-          students
+          rating,
+          students,
+          category->{title, "slug": slug.current} // Fetch referenced category title and slug
         }`;
-        const coursesData = await client.fetch<SanityCourse[]>(query);
+        
+        // Fetch available categories
+        const categoryQuery = `*[_type == "category"] | order(title asc) {title, "slug": slug.current}`;
+
+        // Fetch in parallel
+        const [coursesData, categoriesData] = await Promise.all([
+          client.fetch<SanityCourse[]>(courseQuery),
+          client.fetch<SanityCategory[]>(categoryQuery)
+        ]);
+
         setAllCourses(coursesData);
-        setFilteredCourses(coursesData);
+        setFilteredCourses(coursesData); // Initially show all
+        setAvailableCategories(categoriesData);
+
       } catch (err) {
-        console.error('Failed to fetch courses:', err);
-        setError('Failed to load courses. Please try again later.');
+        console.error('Failed to fetch initial data:', err);
+        setError('Failed to load data. Please try again later.');
       } finally {
         setLoading(false);
+        setLoadingCategories(false);
       }
     };
 
-    fetchCourses();
-  }, []);
+    fetchInitialData();
+  }, []); // Fetch only once on mount
 
-  // Filter courses based on search term and filters (runs when dependencies change)
+  // Update URL params when filters change
   useEffect(() => {
-    let result = allCourses;
+    const params: Record<string, string> = {};
+    if (searchTerm) params.search = searchTerm;
+    if (selectedLevel !== 'All') params.level = selectedLevel;
+    if (selectedCategory !== 'All') params.category = selectedCategory; // Use category slug
 
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+    setSearchParams(params, { replace: true });
+
+  }, [searchTerm, selectedLevel, selectedCategory, setSearchParams]);
+
+
+  // Filter courses based on state (search, level, category)
+  useEffect(() => {
+    if (loading) return; // Don't filter until courses are loaded
+
+    let result = allCourses;
+    const term = searchTerm.toLowerCase();
+
+    if (term) {
       result = result.filter(course =>
         course.title.toLowerCase().includes(term)
+        // TODO: Consider searching description, instructor, etc.
       );
     }
 
     if (selectedLevel !== 'All') {
-      result = result.filter(course => course.difficulty === selectedLevel.toLowerCase());
+      const levelLower = selectedLevel.toLowerCase();
+      result = result.filter(course => course.difficulty && course.difficulty.toLowerCase() === levelLower);
+    }
+
+    if (selectedCategory !== 'All') {
+      // Filter by category slug
+      result = result.filter(course => course.category && course.category.slug === selectedCategory);
     }
 
     setFilteredCourses(result);
-  }, [searchTerm, selectedLevel, allCourses]);
+
+  }, [searchTerm, selectedLevel, selectedCategory, allCourses, loading]); // Depend on all filters and data
+
 
   return (
     <div className="w-full pt-28 pb-20 bg-slate-50 dark:bg-gray-900 min-h-screen transition-colors duration-300">
@@ -132,6 +185,28 @@ const Courses = () => {
 
               {/* Desktop Filters */}
               <div className="hidden md:flex items-center gap-4">
+                 {/* Category Filter Dropdown - Desktop */}
+                 <div className="flex items-center">
+                  <label htmlFor="category" className="mr-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Category:
+                  </label>
+                  <select
+                    id="category"
+                    value={selectedCategory} // Use category slug value
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    disabled={loadingCategories} // Disable while loading
+                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300 disabled:opacity-50"
+                  >
+                    <option value="All">All Categories</option>
+                    {availableCategories.map((cat) => (
+                      <option key={cat.slug} value={cat.slug}> 
+                        {cat.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                {/* Level Filter Dropdown - Desktop */}
                 <div className="flex items-center">
                   <label htmlFor="level" className="mr-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     Level:
@@ -163,6 +238,31 @@ const Courses = () => {
               className="md:hidden overflow-hidden mt-4"
             >
               <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                {/* Category Filter Dropdown - Mobile */}
+                 <div>
+                  <label
+                    htmlFor="mobile-category"
+                    className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    Category:
+                  </label>
+                  <select
+                    id="mobile-category"
+                    value={selectedCategory} // Use category slug
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    disabled={loadingCategories}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300 disabled:opacity-50"
+                  >
+                     <option value="All">All Categories</option>
+                    {availableCategories.map((cat) => (
+                      <option key={cat.slug} value={cat.slug}>
+                        {cat.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Level Filter Dropdown - Mobile */}
                 <div>
                   <label
                     htmlFor="mobile-level"

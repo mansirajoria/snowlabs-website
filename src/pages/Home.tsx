@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRightIcon, CheckIcon, TrendingUpIcon, UsersIcon, BookOpenIcon, AwardIcon, Loader2 } from 'lucide-react';
+import { ArrowRightIcon, CheckIcon, TrendingUpIcon, UsersIcon, BookOpenIcon, AwardIcon, Loader2, SearchIcon } from 'lucide-react';
 import Button from '../components/Button';
 import AnimatedSection from '../components/AnimatedSection';
 import CourseCard, { CourseType } from '../components/CourseCard';
+import CourseCategoriesSection from '../components/CourseCategoriesSection';
 import client from '../sanityClient';
+import { useNavigate } from 'react-router-dom';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination, A11y, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/autoplay';
 
 // Interface for courses fetched for the homepage (similar to Courses.tsx)
 interface SanityHomeCourse {
@@ -19,7 +26,7 @@ interface SanityHomeCourse {
   duration?: string;
   rating?: number;
   students?: number;
-  category?: string;
+  category?: { title: string; slug: { current: string } };
   tags?: string[];
   // featured is used for filtering, not necessarily displaying
 }
@@ -29,6 +36,8 @@ const Home = () => {
   const [featuredCourses, setFeaturedCourses] = useState<SanityHomeCourse[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [errorCourses, setErrorCourses] = useState<string | null>(null);
+  const [heroSearchTerm, setHeroSearchTerm] = useState('');
+  const navigate = useNavigate();
 
   // Fetch featured courses on mount
   useEffect(() => {
@@ -49,7 +58,7 @@ const Home = () => {
           duration,
           rating,
           students,
-          category,
+          category->{title, "slug": slug.current},
           tags
         }`;
         const coursesData = await client.fetch<SanityHomeCourse[]>(query);
@@ -63,6 +72,16 @@ const Home = () => {
     };
     fetchFeaturedCourses();
   }, []);
+
+  // Updated function for search submission
+  const handleHeroSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const searchTermTrimmed = heroSearchTerm.trim();
+    if (searchTermTrimmed) {
+      // Navigate to courses page with search query parameter
+      navigate(`/courses?search=${encodeURIComponent(searchTermTrimmed)}`);
+    }
+  };
 
   return <div className="w-full">
       {/* Hero Section */}
@@ -90,6 +109,33 @@ const Home = () => {
                 digital age. Learn from industry experts and join a community of
                 innovators.
               </p>
+
+              {/* Hero Search Bar */}
+              <form onSubmit={handleHeroSearch} className="mb-8 max-w-lg">
+                <div className="relative">
+                  <SearchIcon
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                    size={22} 
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search courses, topics, or skills..."
+                    value={heroSearchTerm}
+                    onChange={(e) => setHeroSearchTerm(e.target.value)}
+                    className="w-full pl-12 pr-12 py-3 border border-blue-700 rounded-lg bg-white/10 dark:bg-gray-800/20 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 focus:bg-white/20 transition-colors duration-300 shadow-sm"
+                  />
+                  {/* Submit Button/Icon */}
+                  <button 
+                    type="submit"
+                    aria-label="Submit search"
+                    className="absolute right-0 top-0 bottom-0 px-4 flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200"
+                    disabled={!heroSearchTerm.trim()}
+                  >
+                    <ArrowRightIcon size={20} />
+                  </button>
+                </div>
+              </form>
+
               <div className="flex flex-wrap gap-4">
                 <Button to="/courses" size="lg" variant="primary" icon={<ArrowRightIcon size={20} />}>
                   Explore Courses
@@ -191,10 +237,11 @@ const Home = () => {
               <p>{errorCourses}</p>
             </div>
           ) : featuredCourses.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredCourses.map((course, index) => {
-                // Adapt data for CourseCard
-                 const courseCardProps: CourseType = {
+            <div className="relative">
+              {/* Desktop Grid */}
+              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {featuredCourses.map((course, index) => {
+                  const courseCardProps: CourseType = {
                     id: course._id,
                     title: course.title,
                     slug: course.slug.current,
@@ -206,12 +253,57 @@ const Home = () => {
                     duration: course.duration || 'N/A',
                     students: course.students ?? 0,
                     rating: course.rating ?? 0,
-                    category: course.category || 'General',
+                    category: course.category?.title || 'General',
                     tags: course.tags || [],
-                    featured: true // It is featured by definition here
-                 };
-                 return <CourseCard key={course._id} course={courseCardProps} featured={true} index={index} />;
-               })}
+                    featured: true
+                  };
+                  return <CourseCard key={course._id} course={courseCardProps} featured={true} index={index} />;
+                })}
+              </div>
+
+              {/* Mobile Carousel using Swiper */}
+              <div className="md:hidden -mx-4 px-4">
+                <Swiper
+                  modules={[Pagination, A11y, Autoplay]}
+                  spaceBetween={16}
+                  slidesPerView={1.2}
+                  pagination={{ clickable: true, dynamicBullets: true }}
+                  grabCursor={true}
+                  autoplay={{
+                    delay: 3500,
+                    disableOnInteraction: true,
+                    pauseOnMouseEnter: true,
+                  }}
+                  loop={true}
+                  className="pb-16"
+                >
+                  {featuredCourses.map((course, index) => {
+                    const courseCardProps: CourseType = {
+                      id: course._id,
+                      title: course.title,
+                      slug: course.slug.current,
+                      description: course.shortDescription,
+                      image: course.imageUrl || '/placeholder-image.jpg', 
+                      level: course.difficulty || 'N/A',
+                      instructor: course.instructor || 'N/A',
+                      price: course.price ?? 0,
+                      duration: course.duration || 'N/A',
+                      students: course.students ?? 0,
+                      rating: course.rating ?? 0,
+                      category: course.category?.title || 'General',
+                      tags: course.tags || [],
+                      featured: true
+                    };
+                    return (
+                      <SwiperSlide key={course._id} className="h-full">
+                        <div className="h-full">
+                          <CourseCard course={courseCardProps} featured={true} index={index} />
+                        </div>
+                      </SwiperSlide>
+                    );
+                  })}
+                </Swiper>
+              </div>
             </div>
            ) : (
              <p className="text-center text-gray-500 dark:text-gray-400">No featured courses available at the moment.</p>
@@ -224,6 +316,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+      {/* Course Categories Section */}
+      <CourseCategoriesSection />
       {/* Why Choose Us Section */}
       <section className="bg-gray-50 dark:bg-gray-800 py-20 px-4 transition-colors duration-300">
         <div className="container mx-auto max-w-6xl">

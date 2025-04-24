@@ -1,22 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { MenuIcon, XIcon, SunIcon, MoonIcon } from 'lucide-react';
+import { MenuIcon, XIcon, SunIcon, MoonIcon, ChevronDownIcon } from 'lucide-react';
 import Button from './Button';
 import { useDarkMode } from 'usehooks-ts';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Define the type for navigation items and sub-items
+interface NavItem {
+  name: string;
+  path?: string; // Path is optional for dropdown containers
+  subItems?: NavItem[]; // Optional array for dropdown items
+}
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null); // Track open dropdown
   const { isDarkMode, toggle } = useDarkMode();
   const location = useLocation();
 
   useEffect(() => {
-    setIsOpen(false);
+    setIsOpen(false); // Close mobile menu on location change
+    setOpenDropdown(null); // Close dropdown on location change
   }, [location]);
 
-  const navItems = [
+  // Updated navItems with Services dropdown and Resources
+  const navItems: NavItem[] = [
     { name: 'Home', path: '/' },
     { name: 'Courses', path: '/courses' },
+    {
+      name: 'Services',
+      subItems: [
+        { name: 'ServiceNow', path: '/services/servicenow' },
+        { name: 'GRC', path: '/services/grc' },
+        { name: 'RSA Archer', path: '/services/rsa-archer' },
+        { name: 'SAP', path: '/services/sap' },
+      ],
+    },
+    { name: 'Resources', path: '/resources' },
     { name: 'About', path: '/about' },
     { name: 'Contact', path: '/contact' },
   ];
@@ -35,13 +55,20 @@ const Navbar = () => {
   // Get Started Button classes (only needs solid background variant)
   const getStartedButtonBaseClass = ""; // Base classes defined in Button component
   const getStartedButtonSolidClass = ""; // Uses variant="primary"
-  
+
+  const handleDropdownEnter = (itemName: string) => {
+    setOpenDropdown(itemName);
+  };
+
+  const handleDropdownLeave = () => {
+    setOpenDropdown(null);
+  };
+
   return (
     <motion.nav 
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      // Always apply solid background classes
       className={`${navBaseClass} ${navSolidClass}`}
     >
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -54,26 +81,70 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-1"> {/* Reduced space for more items */}
             {navItems.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                // Simplified class logic for solid background
-                className={({ isActive }) =>
-                  `${linkBaseClass} ${isActive ? linkActiveClass : linkInactiveClass}`
-                }
-                end
-              >
-                {item.name}
-              </NavLink>
+              item.subItems ? (
+                // Dropdown Menu Item
+                <div 
+                  key={item.name} 
+                  className="relative"
+                  onMouseEnter={() => handleDropdownEnter(item.name)}
+                  onMouseLeave={handleDropdownLeave}
+                >
+                  <button 
+                    className={`${linkBaseClass} ${linkInactiveClass} flex items-center`}
+                    onClick={(e) => e.preventDefault()} // Prevent navigation on button click
+                  >
+                    {item.name}
+                    <ChevronDownIcon size={16} className={`ml-1 transition-transform ${openDropdown === item.name ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {openDropdown === item.name && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                      >
+                        <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                          {item.subItems.map((subItem) => (
+                            <NavLink
+                              key={subItem.name}
+                              to={subItem.path!} // Use non-null assertion as subItems have paths
+                              className={({ isActive }) => 
+                                `block px-4 py-2 text-sm ${isActive ? 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white' : 'text-gray-700 dark:text-gray-300'} hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white`
+                              }
+                              role="menuitem"
+                              onClick={() => setOpenDropdown(null)} // Close dropdown on click
+                            >
+                              {subItem.name}
+                            </NavLink>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                // Regular NavLink Item
+                <NavLink
+                  key={item.name}
+                  to={item.path!} // Use non-null assertion as top-level non-dropdowns have paths
+                  className={({ isActive }) =>
+                    `${linkBaseClass} ${isActive ? linkActiveClass : linkInactiveClass}`
+                  }
+                  end={item.path === '/'} // Ensure 'end' prop is only for Home
+                >
+                  {item.name}
+                </NavLink>
+              )
             ))}
              {/* Dark Mode Toggle - Desktop */}
              <button
                 onClick={toggle}
                 aria-label="Toggle dark mode"
-                // Simplified class logic for solid background
-                className={`${iconButtonBaseClass} ${iconButtonSolidClass}`}
+                className={`${iconButtonBaseClass} ${iconButtonSolidClass} ml-2`} // Added margin
             >
                 {isDarkMode ? <SunIcon size={20} /> : <MoonIcon size={20} />}
             </button>
@@ -81,9 +152,9 @@ const Navbar = () => {
             {/* Get Started Button */}
             <Button 
               to="/get-started" 
-              variant={'primary'} // Always primary variant
+              variant={'primary'} 
               size="sm"
-              className={getStartedButtonSolidClass} // Always use solid state class (currently empty, relies on variant)
+              className={`${getStartedButtonSolidClass} ml-2`} // Added margin
             >
               Get Started
             </Button>
@@ -95,7 +166,6 @@ const Navbar = () => {
              <button
                 onClick={toggle}
                 aria-label="Toggle dark mode"
-                // Simplified class logic for solid background
                 className={`${iconButtonBaseClass} ${iconButtonSolidClass} mr-2`}
             >
                 {isDarkMode ? <SunIcon size={20} /> : <MoonIcon size={20} />}
@@ -103,7 +173,6 @@ const Navbar = () => {
             {/* Mobile Menu Icon Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-               // Simplified class logic for solid background
               className={`${iconButtonBaseClass} ${iconButtonSolidClass} focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white`}
             >
               <span className="sr-only">Open main menu</span>
@@ -124,20 +193,30 @@ const Navbar = () => {
             className="md:hidden bg-white dark:bg-gray-900 shadow-lg overflow-hidden"
           >
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {navItems.map((item) => (
+              {/* Iterate through items, including sub-items for mobile */}
+              {navItems.flatMap((item) => 
+                item.subItems ? 
+                [ 
+                  // Optional: Add a non-clickable header for the group in mobile
+                  // <div key={`${item.name}-header`} className="px-3 pt-2 pb-1 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">{item.name}</div>,
+                  ...item.subItems.map(subItem => ({ ...subItem, isSubItem: true })) 
+                ] : 
+                [{...item, isSubItem: false}] 
+              ).map((navLinkItem) => (
                 <NavLink
-                  key={item.name}
-                  to={item.path}
+                  key={navLinkItem.name}
+                  to={navLinkItem.path!} // Assert path exists
                   onClick={() => setIsOpen(false)}
                   className={({ isActive }) =>
                     `block px-3 py-2 rounded-md text-base font-medium transition-colors 
                      ${isActive 
                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' 
-                       : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'}`
+                       : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'}
+                     ${(navLinkItem as any).isSubItem ? 'pl-6' : ''}` // Indent sub-items slightly
                   }
-                   end
+                   end={navLinkItem.path === '/'}
                 >
-                  {item.name}
+                  {navLinkItem.name}
                 </NavLink>
               ))}
               <div className="pt-2 border-t border-gray-200 dark:border-gray-700">

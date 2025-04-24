@@ -22,6 +22,14 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'category',
+      title: 'Category',
+      type: 'reference',
+      to: [{ type: 'category' }],
+      description: 'Assign a category to this course.',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
       name: 'image',
       title: 'Course Image',
       type: 'image',
@@ -75,12 +83,35 @@ export default defineType({
       type: 'boolean',
       description: 'Mark this course to feature it on the homepage.',
       initialValue: false,
+      group: 'flags',
+    }),
+    defineField({
+      name: 'isUpcoming',
+      title: 'Upcoming Training',
+      type: 'boolean',
+      description: 'Mark this course as an upcoming training session.',
+      initialValue: false,
+      group: 'flags',
+    }),
+    defineField({
+      name: 'startDate',
+      title: 'Start Date',
+      type: 'datetime',
+      description: 'The specific start date and time for the upcoming session.',
+      options: {
+        dateFormat: 'YYYY-MM-DD',
+        timeFormat: 'HH:mm',
+        timeStep: 15,
+      },
+      hidden: ({document}) => !document?.isUpcoming,
+      group: 'details',
     }),
     defineField({
       name: 'duration',
       title: 'Duration',
       type: 'string',
       description: 'e.g., "40 hours", "6 Weeks"',
+      group: 'details',
     }),
     defineField({
       name: 'difficulty',
@@ -95,6 +126,7 @@ export default defineType({
         layout: 'radio', // or 'dropdown'
       },
        validation: (Rule) => Rule.required(),
+       group: 'details',
     }),
      defineField({
       name: 'price',
@@ -142,11 +174,25 @@ export default defineType({
       }]
     }),
   ],
+  groups: [
+    { name: 'details', title: 'Course Details' },
+    { name: 'content', title: 'Content & Syllabus' },
+    { name: 'flags', title: 'Settings & Flags' }
+  ],
   preview: {
     select: {
       title: 'title',
       subtitle: 'instructor',
+      categoryTitle: 'category.title',
       media: 'image',
+    },
+    prepare(selection) {
+      const { title, subtitle, categoryTitle, media } = selection
+      return {
+        title,
+        subtitle: `${subtitle || ''}${categoryTitle ? ` | ${categoryTitle}` : ''}`,
+        media,
+      }
     },
   },
 }) 

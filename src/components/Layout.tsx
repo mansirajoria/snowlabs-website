@@ -22,7 +22,7 @@ const Layout: React.FC<LayoutProps> = ({
   }, [isDarkMode]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-gray-950 transition-colors duration-300">
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-gray-950 transition-colors duration-300 overflow-hidden">
       <Navbar />
       <main className="flex-grow">{children}</main>
       <Footer />
