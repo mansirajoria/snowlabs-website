@@ -144,13 +144,30 @@ const Home = () => {
                   Learn More
                 </Button>
               </div>
-              <div className="mt-10 flex items-center space-x-6">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map(i => <img key={i} src={`https://randomuser.me/api/portraits/men/${20 + i}.jpg`} alt={`Student ${i}`} className="w-10 h-10 rounded-full border-2 border-blue-800" />)}
+              <div className="mt-10 flex flex-wrap items-center gap-6">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-blue-600/20 rounded-full flex items-center justify-center mr-2">
+                    <UsersIcon size={15} className="text-blue-300" />
+                  </div>
+                  <div className="text-sm text-blue-100">
+                    <span className="font-bold">Over 10,000+</span> Students
+                  </div>
                 </div>
-                <div className="text-sm">
-                  <span className="font-bold">50,000+</span> students already
-                  learning
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-blue-600/20 rounded-full flex items-center justify-center mr-2">
+                    <BookOpenIcon size={15} className="text-blue-300" />
+                  </div>
+                  <div className="text-sm text-blue-100">
+                    <span className="font-bold">More than 30</span> courses
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-blue-600/20 rounded-full flex items-center justify-center mr-2">
+                    <UsersIcon size={15} className="text-blue-300" />
+                  </div>
+                  <div className="text-sm text-blue-100">
+                    <span className="font-bold">200+</span> Instructors
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -318,6 +335,43 @@ const Home = () => {
       </section>
       {/* Course Categories Section */}
       <CourseCategoriesSection />
+      
+      {/* Resources Details Section */}
+      <section className="py-16 px-4 bg-white dark:bg-gray-900 transition-colors duration-300">
+        <div className="container mx-auto max-w-6xl">
+          <AnimatedSection className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">
+              Resources Details
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Access valuable learning materials to enhance your skills
+            </p>
+          </AnimatedSection>
+          
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
+            {[
+              { title: 'Blogs', icon: <BookOpenIcon size={24} /> },
+              { title: 'Interview Questions', icon: <CheckIcon size={24} /> },
+              { title: 'Mock Test', icon: <ArrowRightIcon size={24} /> },
+              { title: 'Tutorial', icon: <TrendingUpIcon size={24} /> },
+              { title: 'Webinars', icon: <UsersIcon size={24} /> }
+            ].map((resource, index) => (
+              <AnimatedSection 
+                key={index}
+                delay={index * 0.1} 
+                className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-all duration-300"
+              >
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-3 text-blue-600 dark:text-blue-400">
+                  {resource.icon}
+                </div>
+                <h3 className="font-semibold text-gray-900 dark:text-white text-center">
+                  {resource.title}
+                </h3>
+              </AnimatedSection>
+            ))}
+          </div>
+        </div>
+      </section>
       {/* Why Choose Us Section */}
       <section className="bg-gray-50 dark:bg-gray-800 py-20 px-4 transition-colors duration-300">
         <div className="container mx-auto max-w-6xl">
