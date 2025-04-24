@@ -392,7 +392,7 @@ const CourseCategoriesSection = () => {
             
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between">
               <div className="mb-6 md:mb-0 text-center md:text-left">
-                <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Need Custom Training Solutions?</h3>
+                <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">Need Corporate Training Solutions?</h3>
                 <p className="text-blue-100 max-w-lg">
                   We offer tailored corporate training programs. Request more information about our courses or discuss custom solutions for your organization.
                 </p>

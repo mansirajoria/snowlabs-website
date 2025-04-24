@@ -28,7 +28,7 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'Courses', path: '/courses' },
     {
-      name: 'Services',
+      name: 'Trainings',
       subItems: [
         { name: 'ServiceNow', path: '/services/servicenow' },
         { name: 'GRC', path: '/services/grc' },
@@ -72,7 +72,7 @@ const Navbar = () => {
       className={`${navBaseClass} ${navSolidClass}`}
     >
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link to="/" className="text-2xl font-bold">
@@ -81,7 +81,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1"> {/* Reduced space for more items */}
+          <div className="hidden md:flex items-center space-x-2"> 
             {navItems.map((item) => (
               item.subItems ? (
                 // Dropdown Menu Item
@@ -92,7 +92,7 @@ const Navbar = () => {
                   onMouseLeave={handleDropdownLeave}
                 >
                   <button 
-                    className={`${linkBaseClass} ${linkInactiveClass} flex items-center`}
+                    className={`${linkBaseClass} ${linkInactiveClass} flex items-center py-3 text-base`}
                     onClick={(e) => e.preventDefault()} // Prevent navigation on button click
                   >
                     {item.name}
@@ -132,7 +132,7 @@ const Navbar = () => {
                   key={item.name}
                   to={item.path!} // Use non-null assertion as top-level non-dropdowns have paths
                   className={({ isActive }) =>
-                    `${linkBaseClass} ${isActive ? linkActiveClass : linkInactiveClass}`
+                    `${linkBaseClass} ${isActive ? linkActiveClass : linkInactiveClass} py-3 text-base`
                   }
                   end={item.path === '/'} // Ensure 'end' prop is only for Home
                 >
