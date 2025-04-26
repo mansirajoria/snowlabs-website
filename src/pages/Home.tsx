@@ -13,13 +13,13 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
 
-// Interface for courses fetched for the homepage (similar to Courses.tsx)
-interface SanityHomeCourse {
+// Interface for raw data fetched from Sanity
+interface SanityFetchedCourse {
   _id: string;
   title: string;
-  slug: { current: string };
-  shortDescription: string;
-  imageUrl: string;
+  slug: { current: string }; // Raw slug
+  shortDescription?: string; // Keep original field names
+  imageUrl?: string;
   difficulty?: string;
   instructor?: string;
   price?: number;
@@ -28,28 +28,63 @@ interface SanityHomeCourse {
   students?: number;
   category?: { title: string; slug: { current: string } };
   tags?: string[];
-  // featured is used for filtering, not necessarily displaying
+  featured?: boolean;
+  startDate?: string;
+  isUpcoming?: boolean;
 }
 
+// Processed data type: Includes CourseType fields + displayType
+interface DisplayCourse {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  image: string;
+  level: string;
+  instructor: string;
+  price: number;
+  duration: string;
+  students: number;
+  rating: number;
+  category: string;
+  tags: string[];
+  featured: boolean;
+  startDate?: string;
+  isUpcoming?: boolean;
+  displayType: 'trending' | 'upcoming';
+  _id: string;
+}
+
+// Configurable limits
+const TRENDING_LIMIT = 3;
+const UPCOMING_LIMIT = 3;
+
+// Define company logos outside the component (or fetch if dynamic)
+const companyLogos = [
+  { name: 'TCS', src: '/companies/tcs.png' },
+  { name: 'EY', src: '/companies/ey.png' },
+  { name: 'PwC', src: '/companies/pwc.png' },
+  { name: 'Optum', src: '/companies/optum.png' },
+  { name: 'KPMG', src: '/companies/kpmg.png' },
+  { name: 'Deloitte', src: '/companies/deloitte.png' },
+];
+
 const Home = () => {
-  // State for featured courses
-  const [featuredCourses, setFeaturedCourses] = useState<SanityHomeCourse[]>([]);
+  const [combinedCourses, setCombinedCourses] = useState<DisplayCourse[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [errorCourses, setErrorCourses] = useState<string | null>(null);
   const [heroSearchTerm, setHeroSearchTerm] = useState('');
   const navigate = useNavigate();
 
-  // Fetch featured courses on mount
   useEffect(() => {
-    const fetchFeaturedCourses = async () => {
+    const fetchCombinedCourses = async () => {
       setLoadingCourses(true);
       setErrorCourses(null);
       try {
-        // Fetch top 3 featured courses
-        const query = `*[_type == "course" && featured == true] | order(_createdAt desc)[0...3] {
+        const courseFields = `{
           _id,
           title,
-          slug,
+          slug, // Fetch slug object
           shortDescription,
           "imageUrl": image.asset->url,
           difficulty,
@@ -59,18 +94,55 @@ const Home = () => {
           rating,
           students,
           category->{title, "slug": slug.current},
-          tags
+          tags,
+          featured,
+          isUpcoming,
+          startDate
         }`;
-        const coursesData = await client.fetch<SanityHomeCourse[]>(query);
-        setFeaturedCourses(coursesData);
+
+        const trendingQuery = `*[_type == "course" && featured == true] | order(_createdAt desc)[0...${TRENDING_LIMIT}] ${courseFields}`;
+        const upcomingQuery = `*[_type == "course" && isUpcoming == true && featured != true] | order(startDate asc)[0...${UPCOMING_LIMIT}] ${courseFields}`; // Adjusted upcoming query slightly
+
+        const [trendingData, upcomingData] = await Promise.all([
+          client.fetch<SanityFetchedCourse[]>(trendingQuery),
+          client.fetch<SanityFetchedCourse[]>(upcomingQuery)
+        ]);
+
+        // Use the refined DisplayCourse type for mapping
+        const mapToDisplayCourse = (course: SanityFetchedCourse, type: 'trending' | 'upcoming'): DisplayCourse => ({
+          id: course._id,
+          _id: course._id,
+          title: course.title,
+          slug: course.slug.current,
+          description: course.shortDescription || '',
+          image: course.imageUrl || '/placeholder-image.jpg',
+          level: course.difficulty || 'N/A',
+          instructor: course.instructor || 'N/A',
+          price: course.price ?? 0,
+          duration: course.duration || 'N/A',
+          students: course.students ?? 0,
+          rating: course.rating ?? 0,
+          category: course.category?.title || 'General',
+          tags: course.tags || [],
+          featured: course.featured ?? false,
+          startDate: course.startDate,
+          isUpcoming: course.isUpcoming ?? false,
+          displayType: type
+        });
+
+        const trendingCoursesMapped: DisplayCourse[] = trendingData.map(c => mapToDisplayCourse(c, 'trending'));
+        const upcomingCoursesMapped: DisplayCourse[] = upcomingData.map(c => mapToDisplayCourse(c, 'upcoming'));
+
+        setCombinedCourses([...trendingCoursesMapped, ...upcomingCoursesMapped]);
+
       } catch (err) {
-        console.error('Failed to fetch featured courses:', err);
-        setErrorCourses('Failed to load featured courses.');
+        console.error('Failed to fetch combined courses:', err);
+        setErrorCourses('Failed to load courses.');
       } finally {
         setLoadingCourses(false);
       }
     };
-    fetchFeaturedCourses();
+    fetchCombinedCourses();
   }, []);
 
   // Updated function for search submission
@@ -98,16 +170,13 @@ const Home = () => {
             duration: 0.8
           }}>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-                Transform Your Future with{' '}
+                Career Transformation{' '}
                 <span className="bg-gradient-to-r from-blue-400 to-teal-300 bg-clip-text text-transparent">
-                  Next-Gen
+                  Begins Here
                 </span>{' '}
-                Learning
               </h1>
               <p className="text-lg md:text-xl text-blue-100 mb-8">
-                Unlock your potential with cutting-edge courses designed for the
-                digital age. Learn from industry experts and join a community of
-                innovators.
+              Discover practical, expert-driven training in ServiceNow and Archer that opens new career paths. Leader of ServiceNow and Archer
               </p>
 
               {/* Hero Search Bar */}
@@ -190,7 +259,7 @@ const Home = () => {
                     <TrendingUpIcon className="text-blue-600 dark:text-blue-400" size={20} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-800 dark:text-white">94% Success</h3>
+                    <h3 className="font-bold text-gray-800 dark:text-white">94% Training Result</h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Career advancement</p>
                   </div>
                 </div>
@@ -201,7 +270,7 @@ const Home = () => {
                     <AwardIcon className="text-teal-600 dark:text-teal-400" size={20} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-800 dark:text-white">Top Rated</h3>
+                    <h3 className="font-bold text-gray-800 dark:text-white">GRC and Archer Leader</h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Industry recognized</p>
                   </div>
                 </div>
@@ -211,40 +280,54 @@ const Home = () => {
           </div>
         </div>
       </section>
-      {/* Trusted By Section */}
-      <section className="bg-gray-50 dark:bg-gray-800 py-10 transition-colors duration-300">
+
+      {/* Trusted By Section - Marquee */}
+      <section className="bg-gray-100 dark:bg-gray-800 py-12 transition-colors duration-300 overflow-hidden">
         <div className="container mx-auto max-w-6xl px-4">
-          <p className="text-center text-gray-500 dark:text-gray-400 mb-6">
-            TRUSTED BY LEADING COMPANIES
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-            {['Google', 'Microsoft', 'Amazon', 'Meta', 'Apple'].map((company, index) => <motion.div key={company} initial={{
-            opacity: 0
-          }} animate={{
-            opacity: 1
-          }} transition={{
-            duration: 0.5,
-            delay: index * 0.1
-          }} className="text-gray-400 dark:text-gray-500 font-bold text-xl">
-                  {company}
-                </motion.div>)}
+          <h3 className="text-center text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-8">
+            Trusted by professionals at leading companies
+          </h3>
+          <div className="relative flex overflow-hidden group">
+            <div className="flex animate-marquee group-hover:pause whitespace-nowrap">
+              {[...companyLogos, ...companyLogos].map((logo, index) => {
+                // Define base max-height and specific height adjustments
+                const baseHeightClass = "max-h-8 md:max-h-10";
+                const specificHeightClass = "h-10 md:h-12"; // Explicit height for EY & PwC
+                
+                let heightClass = baseHeightClass; // Default
+                if (logo.name === 'EY' || logo.name === 'PwC') {
+                  heightClass = specificHeightClass;
+                }
+                
+                return (
+                  <div key={`${logo.name}-${index}-marquee`} className="mx-8 flex-shrink-0 flex items-center justify-center h-12 md:h-14"> 
+                    <img 
+                      src={logo.src} 
+                      alt={`${logo.name} logo`} 
+                      className={`${heightClass} object-contain w-auto`} // Apply dynamic height class
+                      loading="lazy"
+                    />
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </section>
-      {/* Featured Courses Section */}
+
+      {/* Combined Courses Section */}
       <section className="py-20 px-4 bg-white dark:bg-gray-900 transition-colors duration-300">
         <div className="container mx-auto max-w-6xl">
           <AnimatedSection className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white">
-              Trending Courses
+              Trending and Upcoming Courses
             </h2>
             <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Explore our most popular courses designed to help you master
-              in-demand skills and advance your career.
+              Explore our popular courses and secure your spot in upcoming sessions.
             </p>
           </AnimatedSection>
           
-          {/* Loading/Error/Display for Featured Courses */}
+          {/* Loading/Error/Display Logic - Use combinedCourses state */}
           {loadingCourses ? (
             <div className="flex justify-center items-center py-10">
               <Loader2 className="animate-spin text-blue-600 dark:text-blue-400" size={36} />
@@ -253,32 +336,21 @@ const Home = () => {
             <div className="text-center py-10 text-red-600 dark:text-red-400">
               <p>{errorCourses}</p>
             </div>
-          ) : featuredCourses.length > 0 ? (
+          ) : combinedCourses.length > 0 ? (
             <div className="relative">
-              {/* Desktop Grid */}
+              {/* Desktop Grid - Pass course and displayType */}
               <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {featuredCourses.map((course, index) => {
-                  const courseCardProps: CourseType = {
-                    id: course._id,
-                    title: course.title,
-                    slug: course.slug.current,
-                    description: course.shortDescription,
-                    image: course.imageUrl || '/placeholder-image.jpg', 
-                    level: course.difficulty || 'N/A',
-                    instructor: course.instructor || 'N/A',
-                    price: course.price ?? 0,
-                    duration: course.duration || 'N/A',
-                    students: course.students ?? 0,
-                    rating: course.rating ?? 0,
-                    category: course.category?.title || 'General',
-                    tags: course.tags || [],
-                    featured: true
-                  };
-                  return <CourseCard key={course._id} course={courseCardProps} featured={true} index={index} />;
-                })}
+                {combinedCourses.map((course, index) => (
+                  <CourseCard 
+                    key={course._id} 
+                    course={course} // Pass the object matching CourseType implicitly
+                    displayType={course.displayType} // Pass displayType separately
+                    index={index} 
+                  />
+                ))}
               </div>
 
-              {/* Mobile Carousel using Swiper */}
+              {/* Mobile Carousel - Pass course and displayType */}
               <div className="md:hidden -mx-4 px-4">
                 <Swiper
                   modules={[Pagination, A11y, Autoplay]}
@@ -294,36 +366,22 @@ const Home = () => {
                   loop={true}
                   className="pb-16"
                 >
-                  {featuredCourses.map((course, index) => {
-                    const courseCardProps: CourseType = {
-                      id: course._id,
-                      title: course.title,
-                      slug: course.slug.current,
-                      description: course.shortDescription,
-                      image: course.imageUrl || '/placeholder-image.jpg', 
-                      level: course.difficulty || 'N/A',
-                      instructor: course.instructor || 'N/A',
-                      price: course.price ?? 0,
-                      duration: course.duration || 'N/A',
-                      students: course.students ?? 0,
-                      rating: course.rating ?? 0,
-                      category: course.category?.title || 'General',
-                      tags: course.tags || [],
-                      featured: true
-                    };
-                    return (
-                      <SwiperSlide key={course._id} className="h-full">
-                        <div className="h-full">
-                          <CourseCard course={courseCardProps} featured={true} index={index} />
-                        </div>
-                      </SwiperSlide>
-                    );
-                  })}
+                  {combinedCourses.map((course, index) => (
+                    <SwiperSlide key={course._id} className="h-full">
+                      <div className="h-full">
+                        <CourseCard 
+                          course={course} 
+                          displayType={course.displayType}
+                          index={index} 
+                        />
+                      </div>
+                    </SwiperSlide>
+                  ))}
                 </Swiper>
               </div>
             </div>
            ) : (
-             <p className="text-center text-gray-500 dark:text-gray-400">No featured courses available at the moment.</p>
+             <p className="text-center text-gray-500 dark:text-gray-400">No courses available at the moment.</p>
            )}
 
           <div className="text-center mt-12">
@@ -384,24 +442,35 @@ const Home = () => {
                 Why Choose SnowLabs?
               </h2>
               <p className="text-gray-600 dark:text-gray-300">
-                We're committed to providing a cutting-edge learning experience
-                that prepares you for the future of work. Our approach combines
-                expert instruction, hands-on projects, and a supportive
-                community.
+              Designed for Professionals. Driven by Results.
+              At SnowLabs, we don't just teach—we train you to thrive. Whether you're diving into ServiceNow or mastering RSA Archer, SAP, our programs are built by industry experts to prepare you for real-world success.
+
               </p>
-              <div className="space-y-4 mt-6">
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 {[{
-                title: 'Industry Expert Instructors',
-                description: 'Learn from professionals with real-world experience'
+                title: 'Learn from Industry Experts',
+                description: 'Learn from professionals with real-world experienceTrain with professionals who bring real-world experience, not just theory'
               }, {
-                title: 'Project-Based Learning',
-                description: 'Build a portfolio of projects that demonstrate your skills'
+                title: 'Real-Time Projects',
+                description: 'Build a standout portfolio with hands-on, real-time projects'
               }, {
-                title: 'Flexible Learning Schedule',
-                description: 'Study at your own pace, anywhere, anytime'
+                title: 'Always Updated Curriculum',
+                description: 'Stay ahead with the latest industry standards and trends'
+              }, {
+                title: 'Flexible Learning',
+                description: 'Study at your own pace, anywhere—our platform fits your schedule'
               }, {
                 title: 'Career Support',
-                description: 'Get guidance on job searching and interview preparation'
+                description: 'Get career counseling, job referrals, and interview prep'
+              }, {
+                title: 'Placement Assistance',
+                description: 'Connect with hiring partners and boost your chances of landing your dream job'
+              }, {
+                title: 'Small Batch Sizes',
+                description: 'Receive personalized attention in limited-size training groups'
+              }, {
+                title: 'No-Cost EMI Options',
+                description: 'Learn now, pay later with easy, no-cost EMI plans'
               }].map((item, index) => <motion.div key={index} initial={{
                 opacity: 0,
                 x: 20
@@ -445,11 +514,11 @@ const Home = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[{
             icon: <UsersIcon size={32} />,
-            value: '50,000+',
+            value: '10,000+',
             label: 'Students'
           }, {
             icon: <BookOpenIcon size={32} />,
-            value: '200+',
+            value: '30+',
             label: 'Courses'
           }, {
             icon: <AwardIcon size={32} />,
@@ -457,8 +526,8 @@ const Home = () => {
             label: 'Completion Rate'
           }, {
             icon: <TrendingUpIcon size={32} />,
-            value: '80%',
-            label: 'Career Growth'
+            value: '20+',
+            label: 'Corporate Trainings'
           }].map((stat, index) => <AnimatedSection key={index} delay={index * 0.1} className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md dark:border dark:border-gray-700 transition-colors duration-300">
                 <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
                   {stat.icon}
@@ -486,19 +555,19 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[{
             name: 'Jessica Miller',
-            role: 'UX Designer at Google',
+            role: 'ServiceNow Developer',
             image: 'https://randomuser.me/api/portraits/women/44.jpg',
-            text: 'The UX/UI Design Masterclass completely changed my career trajectory. Within 3 months of completing the course, I landed my dream job at Google!'
+            text: 'SnowLabs ServiceNow training was incredibly thorough. The hands-on projects gave me the confidence I needed, and I quickly found a great role after completion.'
           }, {
             name: 'Michael Johnson',
-            role: 'Full Stack Developer',
+            role: 'GRC Consultant',
             image: 'https://randomuser.me/api/portraits/men/32.jpg',
-            text: "I had zero coding experience before taking the Web Development Bootcamp. The curriculum was challenging but extremely rewarding. Now I'm working as a full-time developer."
+            text: "The Archer and GRC courses were exactly what I needed to pivot my career. The instructors were experts and the practical approach made learning complex topics manageable."
           }, {
             name: 'Sophia Chen',
-            role: 'Data Scientist at Amazon',
+            role: 'SAP Analyst',
             image: 'https://randomuser.me/api/portraits/women/65.jpg',
-            text: 'The Data Science course provided me with practical skills that I use every day in my role. The instructors were knowledgeable and supportive throughout my learning journey.'
+            text: 'Excellent SAP course content and fantastic support from the training manager. The lifetime access to materials is a huge plus for staying updated.'
           }].map((testimonial, index) => <AnimatedSection key={index} delay={index * 0.1} className="bg-white/10 dark:bg-gray-900/30 backdrop-blur-lg p-6 rounded-xl text-white">
                 <div className="flex items-center mb-4">
                   <img src={testimonial.image} alt={testimonial.name} className="w-14 h-14 rounded-full mr-4" />

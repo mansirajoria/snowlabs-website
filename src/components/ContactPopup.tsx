@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { XIcon, SendIcon, CheckIcon, AlertCircleIcon, MailIcon, UserIcon, MessageSquareIcon } from 'lucide-react';
+import { XIcon, SendIcon, CheckIcon, AlertCircleIcon, MailIcon, PhoneIcon, MessageSquareIcon } from 'lucide-react';
 import Button from './Button';
 
 // Read endpoint from environment variables
@@ -9,8 +9,8 @@ const formspreeEndpoint = import.meta.env.VITE_FORMSPREE_ENDPOINT;
 const ContactPopup: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [formState, setFormState] = useState({
-    name: '',
     email: '',
+    phone: '',
     message: ''
   });
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
@@ -50,7 +50,6 @@ const ContactPopup: React.FC = () => {
       return;
     }
 
-    // Prepare data for Formspree, including a tag to identify it came from the popup
     const formData = { 
       ...formState,
       _source: 'popup_form'
@@ -68,7 +67,7 @@ const ContactPopup: React.FC = () => {
 
       if (response.ok) {
         setStatus('success');
-        setFormState({ name: '', email: '', message: '' }); // Clear form
+        setFormState({ email: '', phone: '', message: '' });
       } else {
         // Try to get error details from Formspree response
         try {
@@ -114,7 +113,7 @@ const ContactPopup: React.FC = () => {
                   />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-blue-900/80 to-transparent h-48 flex flex-col justify-end p-6 text-white">
                     <h3 className="text-2xl font-bold mb-2 text-white drop-shadow-md">
-                      Transform Your Future
+                      Find Your Ideal Training Program
                     </h3>
                     <p className="text-white/90 text-sm mb-0 drop-shadow-md">
                       Join thousands of professionals who've elevated their careers with our expert training solutions.
@@ -127,7 +126,7 @@ const ContactPopup: React.FC = () => {
               <div className="w-full md:w-1/2 p-6 md:p-8">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    Get Started Today
+                    Talk To Our Advisor
                   </h3>
                   {/* Close button */}
                   <button 
@@ -167,22 +166,6 @@ const ContactPopup: React.FC = () => {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <UserIcon size={16} className="text-blue-500 dark:text-blue-400" />
-                      </div>
-                      <input 
-                        type="text" 
-                        id="name" 
-                        name="name" 
-                        value={formState.name} 
-                        onChange={handleChange} 
-                        required
-                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                        placeholder="Your full name" 
-                        disabled={status === 'submitting'} 
-                      />
-                    </div>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <MailIcon size={16} className="text-blue-500 dark:text-blue-400" />
                       </div>
                       <input 
@@ -198,6 +181,22 @@ const ContactPopup: React.FC = () => {
                       />
                     </div>
                     <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <PhoneIcon size={16} className="text-blue-500 dark:text-blue-400" />
+                      </div>
+                      <input 
+                        type="tel"
+                        id="phone" 
+                        name="phone" 
+                        value={formState.phone} 
+                        onChange={handleChange} 
+                        required
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        placeholder="Your phone number" 
+                        disabled={status === 'submitting'} 
+                      />
+                    </div>
+                    <div className="relative">
                       <div className="absolute top-3 left-3 flex items-start pointer-events-none">
                         <MessageSquareIcon size={16} className="text-blue-500 dark:text-blue-400" />
                       </div>
@@ -206,10 +205,9 @@ const ContactPopup: React.FC = () => {
                         name="message" 
                         value={formState.message} 
                         onChange={handleChange} 
-                        required
                         rows={3}
                         className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                        placeholder="I'm interested in learning more about..." 
+                        placeholder="I'm interested in learning more about... (Optional)" 
                         disabled={status === 'submitting'} 
                       />
                     </div>

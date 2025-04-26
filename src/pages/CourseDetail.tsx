@@ -21,21 +21,47 @@ interface SanityCourseDetail {
   price?: number;
   category?: any;
   categoryName?: string;
+  shortDescription?: string;
   longDescription?: any[];
   modules?: Array<{ _key: string; title: string; description?: string }>;
+  testimonials?: Array<{ _key: string; quote: string; author: string }>;
 }
 
 const ptComponents = {
+  types: {
+    // You can add custom block types here if needed in the future
+  },
   block: {
     h2: ({ children }: any) => <h2 className="text-2xl font-bold mt-8 mb-4">{children}</h2>,
     h3: ({ children }: any) => <h3 className="text-xl font-semibold mt-6 mb-3">{children}</h3>,
-    blockquote: ({ children }: any) => <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4 text-gray-600">{children}</blockquote>,
-    normal: ({ children }: any) => <p className="mb-4 text-gray-700">{children}</p>,
+    blockquote: ({ children }: any) => <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4 text-gray-600 dark:text-gray-400">{children}</blockquote>,
+    normal: ({ children }: any) => <p className="mb-4 text-gray-700 dark:text-gray-300">{children}</p>,
+    // Add default heading handlers if needed, or rely on Prose
+    // h4: ({children}: any) => <h4 className="text-lg font-semibold mt-5 mb-2">{children}</h4>,
   },
   marks: {
-    strong: ({ children }: any) => <strong>{children}</strong>,
-    em: ({ children }: any) => <em>{children}</em>,
-    code: ({ children }: any) => <code className="bg-gray-100 p-1 rounded text-sm font-mono">{children}</code>,
+    strong: ({ children }: any) => <strong className="font-bold">{children}</strong>, // Ensure font-bold is applied
+    em: ({ children }: any) => <em className="italic">{children}</em>, // Ensure italic is applied
+    code: ({ children }: any) => <code className="bg-gray-100 dark:bg-gray-700 p-1 rounded text-sm font-mono">{children}</code>,
+    link: ({ value, children }: any) => {
+      const target = (value?.href || '').startsWith('http') ? '_blank' : undefined;
+      const rel = target === '_blank' ? 'noindex nofollow' : undefined;
+      return (
+        <a href={value?.href} target={target} rel={rel} className="text-blue-600 dark:text-blue-400 hover:underline">
+          {children}
+        </a>
+      );
+    },
+    // Add underline, strikethrough etc. if used in Sanity
+    // underline: ({children}: any) => <span className="underline">{children}</span>,
+  },
+  list: {
+    bullet: ({ children }: any) => <ul className="list-disc list-inside space-y-2 my-4 ml-4">{children}</ul>, // Apply list styles
+    number: ({ children }: any) => <ol className="list-decimal list-inside space-y-2 my-4 ml-4">{children}</ol>, // Apply list styles
+  },
+  listItem: {
+    bullet: ({ children }: any) => <li className="text-gray-700 dark:text-gray-300">{children}</li>,
+    number: ({ children }: any) => <li className="text-gray-700 dark:text-gray-300">{children}</li>,
   },
 };
 
@@ -69,11 +95,17 @@ const CourseDetail = () => {
           price,
           category,
           "categoryName": category->title,
+          shortDescription,
           longDescription,
           modules[]{
             _key,
             title,
             description
+          },
+          testimonials[]{
+            _key,
+            quote,
+            author
           }
         }`;
         const courseData = await client.fetch<SanityCourseDetail>(query, { slug });
@@ -203,13 +235,16 @@ const CourseDetail = () => {
               )}
             </div>
             <AnimatedSection>
-              {course.longDescription ? (
-                 <div className="prose prose-lg dark:prose-invert max-w-none mb-6">
+              {course.shortDescription ? (
+                 <div className="mb-6">
                    <h2 className="text-xl font-bold mb-3 text-gray-800 dark:text-white">About This Course</h2>
-                   <PortableText value={course.longDescription} components={ptComponents} />
+                   <p className="text-gray-700 dark:text-gray-300">{course.shortDescription}</p>
                  </div>
               ) : (
-                <p className="text-gray-700 dark:text-gray-300 mb-6">No detailed description available.</p>
+                 <div className="mb-6">
+                   <h2 className="text-xl font-bold mb-3 text-gray-800 dark:text-white">About This Course</h2>
+                   <p className="text-gray-700 dark:text-gray-300 italic">Brief description coming soon.</p>
+                 </div>
               )}
               
               {course.price !== undefined && course.price !== null && (
@@ -225,6 +260,16 @@ const CourseDetail = () => {
             </AnimatedSection>
           </div>
         </div>
+
+        {course.longDescription && course.longDescription.length > 0 && (
+          <AnimatedSection className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 md:p-8 mb-12 transition-colors duration-300">
+            <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Detailed Overview</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <PortableText value={course.longDescription} components={ptComponents} />
+            </div>
+          </AnimatedSection>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           <div className="lg:col-span-2">
              {course.modules && course.modules.length > 0 && (
@@ -287,6 +332,29 @@ const CourseDetail = () => {
             ))}
           </div>
         </AnimatedSection>
+
+        {/* Testimonials Section */}
+        {course.testimonials && course.testimonials.length > 0 && (
+          <AnimatedSection className="mb-12">
+            <h2 className="text-2xl font-bold mb-8 text-center text-gray-800 dark:text-white">What Our Students Say</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {course.testimonials.map((testimonial, index) => (
+                <motion.div
+                  key={testimonial._key}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 flex flex-col transition-colors duration-300"
+                >
+                  <p className="text-gray-600 dark:text-gray-300 italic mb-4 flex-grow">"{testimonial.quote}"</p>
+                  <p className="font-semibold text-gray-800 dark:text-gray-100 text-right">- {testimonial.author}</p>
+                </motion.div>
+              ))}
+            </div>
+          </AnimatedSection>
+        )}
+
       </div>
     </div>
   );

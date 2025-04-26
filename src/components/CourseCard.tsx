@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ClockIcon, UsersIcon, StarIcon, TrendingUpIcon } from 'lucide-react';
+import { ClockIcon, UsersIcon, StarIcon, TrendingUpIcon, CalendarIcon } from 'lucide-react';
 import Button from './Button';
 
 export interface CourseType {
@@ -19,19 +19,23 @@ export interface CourseType {
   category: string;
   tags: string[];
   featured?: boolean;
+  startDate?: string;
+  isUpcoming?: boolean;
 }
 
-interface CourseCardProps {
+export interface CourseCardProps {
   course: CourseType;
-  featured?: boolean;
+  displayType?: 'trending' | 'upcoming';
   index?: number;
 }
 
 const CourseCard: React.FC<CourseCardProps> = ({
   course,
-  featured = false,
+  displayType,
   index = 0
 }) => {
+  const isFeatured = course.featured === true;
+  
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -39,16 +43,24 @@ const CourseCard: React.FC<CourseCardProps> = ({
       transition={{ duration: 0.4, delay: index * 0.1 }}
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
       className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-md overflow-hidden flex flex-col h-full 
-                  ${featured ? 'border-2 border-blue-500 dark:border-blue-400' : 'border dark:border-gray-700'}
+                  ${isFeatured ? 'border-2 border-blue-500 dark:border-blue-400' : 'border dark:border-gray-700'}
                   transition-colors duration-300`}
     >
       <div className="relative">
         <img src={course.image} alt={course.title} className="w-full h-48 object-cover" />
-        {featured && (
-          <div className="absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-            Featured
-          </div>
-        )}
+        <div className="absolute top-3 right-3 flex flex-col items-end space-y-1">
+          {displayType === 'upcoming' && (
+            <div className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center">
+              <CalendarIcon size={12} className="mr-1" />
+              Upcoming
+            </div>
+          )}
+          {isFeatured && displayType !== 'upcoming' && (
+            <div className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+              Featured
+            </div>
+          )}
+        </div>
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
           <div className="flex items-center text-white">
             <span className="text-sm font-semibold bg-blue-600 px-3 py-1 rounded-full">
@@ -96,7 +108,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
           <Button 
             to={`/courses/${course.slug}`} 
             size="sm" 
-            variant={featured ? 'primary' : 'outline'}
+            variant={isFeatured ? 'primary' : 'outline'}
           >
             View Details
           </Button>

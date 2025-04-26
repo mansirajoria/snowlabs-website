@@ -23,10 +23,9 @@ const Navbar = () => {
     setOpenDropdown(null); // Close dropdown on location change
   }, [location]);
 
-  // Updated navItems with Services dropdown and Resources
+  // Updated navItems: Remove 'Courses', keep others
   const navItems: NavItem[] = [
     { name: 'Home', path: '/' },
-    { name: 'Courses', path: '/courses' },
     {
       name: 'Trainings',
       subItems: [
@@ -112,22 +111,32 @@ const Navbar = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                        className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
                       >
                         <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                           {item.subItems.map((subItem) => (
                             <NavLink
                               key={subItem.name}
-                              to={subItem.path!} // Use non-null assertion as subItems have paths
+                              to={subItem.path!} 
                               className={({ isActive }) => 
-                                `block px-4 py-2 text-sm ${isActive ? 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white' : 'text-gray-700 dark:text-gray-300'} hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white`
+                                `block px-4 py-2 text-sm ${isActive ? 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white' : 'text-gray-700 dark:text-gray-300'} hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white transition-colors`
                               }
                               role="menuitem"
-                              onClick={() => setOpenDropdown(null)} // Close dropdown on click
+                              onClick={() => setOpenDropdown(null)} 
                             >
                               {subItem.name}
                             </NavLink>
                           ))}
+                          {/* Add Explore All Courses Link/Button below subItems */}
+                          <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                          <Link 
+                            to="/courses"
+                            className="block w-full text-left px-4 py-2.5 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors rounded-b-md"
+                            role="menuitem"
+                            onClick={() => setOpenDropdown(null)}
+                          >
+                            Explore all courses
+                          </Link>
                         </div>
                       </motion.div>
                     )}
@@ -137,11 +146,11 @@ const Navbar = () => {
                 // Regular NavLink Item
                 <NavLink
                   key={item.name}
-                  to={item.path!} // Use non-null assertion as top-level non-dropdowns have paths
+                  to={item.path!}
                   className={({ isActive }) =>
                     `${linkBaseClass} ${isActive ? linkActiveClass : linkInactiveClass} py-3 text-base`
                   }
-                  end={item.path === '/'} // Ensure 'end' prop is only for Home
+                  end={item.path === '/'}
                 >
                   {item.name}
                 </NavLink>

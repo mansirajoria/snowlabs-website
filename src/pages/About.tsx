@@ -1,20 +1,57 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckIcon, UsersIcon, BookOpenIcon, AwardIcon, TrendingUpIcon } from 'lucide-react';
+import { CheckIcon, UsersIcon, BookOpenIcon, AwardIcon, TrendingUpIcon, MailIcon, PhoneIcon, MapPinIcon, ChevronDownIcon } from 'lucide-react';
 import AnimatedSection from '../components/AnimatedSection';
 import Button from '../components/Button';
 
+// Helper component for FAQ items (optional, but good practice)
+const FaqItem = ({ question, answer }: { question: string, answer: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <motion.div 
+      layout
+      className="border-b border-gray-200 dark:border-gray-700 overflow-hidden"
+    >
+      <motion.button
+        layout
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex justify-between items-center w-full py-4 text-left text-lg font-medium text-gray-800 dark:text-gray-100"
+      >
+        <span>{question}</span>
+        <motion.div animate={{ rotate: isOpen ? 180 : 0 }}>
+          <ChevronDownIcon size={20} />
+        </motion.div>
+      </motion.button>
+      <motion.div
+        layout
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ 
+          height: isOpen ? 'auto' : 0, 
+          opacity: isOpen ? 1 : 0,
+          marginTop: isOpen ? '0.5rem' : '0rem',
+          marginBottom: isOpen ? '1rem' : '0rem'
+        }}
+        transition={{ duration: 0.3 }}
+        className="overflow-hidden"
+      >
+        <p className="text-gray-600 dark:text-gray-400 pl-2 pr-6">
+          {answer}
+        </p>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 const About = () => {
-  return <div className="w-full pt-28 pb-20 min-h-screen">
+  return <div className="w-full pt-28 pb-20 min-h-screen bg-slate-50 dark:bg-gray-950">
       <div className="container mx-auto max-w-6xl px-4">
         {/* Hero Section */}
         <AnimatedSection className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white">
-            About SnowLabs
+            ABOUT US
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-            We're on a mission to transform education through innovative
-            technology and engaging learning experiences.
+            At SnowLabs, we're proud to be a trusted leader in ServiceNow, Governance, Risk, and Compliance (GRC) and ARCHER training—empowering over 10,000 students to succeed in high-demand roles across the globe.
           </p>
         </AnimatedSection>
         {/* Our Story */}
@@ -27,8 +64,7 @@ const About = () => {
             <p className="text-gray-600 dark:text-gray-400">
               SnowLabs was founded in 2018 with a simple but powerful idea:
               education should be accessible, engaging, and relevant to the
-              modern world. What started as a small team with big dreams has
-              grown into a thriving community of learners and educators.
+              modern world. SnowLabs aims to provide access learning on for ServiceNow Platforms. What started as a small team with big dreams has grown into a thriving community of learners and educators.
             </p>
             <p className="text-gray-600 dark:text-gray-400">
               We believe that everyone deserves access to high-quality education
@@ -37,7 +73,7 @@ const About = () => {
               experiences that are both effective and enjoyable.
             </p>
             <p className="text-gray-600 dark:text-gray-400">
-              Today, we're proud to have helped over 50,000 students from around
+              Today, we're proud to have helped over 10,000 students from around
               the world develop new skills, advance their careers, and achieve
               their goals. But this is just the beginning of our journey.
             </p>
@@ -144,59 +180,6 @@ const About = () => {
               </motion.div>)}
           </div>
         </AnimatedSection>
-        {/* Our Team */}
-        <AnimatedSection className="mb-20">
-          <h2 className="text-3xl font-bold text-center mb-4 text-gray-900 dark:text-white">
-            Our Leadership Team
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 text-center max-w-3xl mx-auto mb-12">
-            Meet the passionate individuals who are driving our mission forward
-            and helping to shape the future of education.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[{
-            name: 'David Chen',
-            role: 'Founder & CEO',
-            image: 'https://randomuser.me/api/portraits/men/32.jpg',
-            bio: 'Former tech executive with a passion for education and accessibility.'
-          }, {
-            name: 'Sarah Johnson',
-            role: 'Chief Learning Officer',
-            image: 'https://randomuser.me/api/portraits/women/44.jpg',
-            bio: 'EdTech innovator with 15+ years of experience in curriculum development.'
-          }, {
-            name: 'Michael Rodriguez',
-            role: 'CTO',
-            image: 'https://randomuser.me/api/portraits/men/67.jpg',
-            bio: 'Software engineer and AI specialist focused on creating personalized learning experiences.'
-          }, {
-            name: 'Emily Zhang',
-            role: 'Head of Student Success',
-            image: 'https://randomuser.me/api/portraits/women/65.jpg',
-            bio: 'Former educator dedicated to supporting students throughout their learning journey.'
-          }].map((person, index) => <motion.div key={index} initial={{
-            opacity: 0,
-            y: 20
-          }} whileInView={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            duration: 0.4,
-            delay: index * 0.1
-          }} viewport={{
-            once: true
-          }} className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
-                <img src={person.image} alt={person.name} className="w-full h-48 object-cover" />
-                <div className="p-5">
-                  <h3 className="text-xl font-bold mb-1 text-gray-900 dark:text-white">{person.name}</h3>
-                  <p className="text-blue-600 dark:text-blue-400 font-medium mb-3">
-                    {person.role}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-400">{person.bio}</p>
-                </div>
-              </motion.div>)}
-          </div>
-        </AnimatedSection>
         {/* Stats */}
         <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white rounded-xl shadow-xl p-8 mb-20">
           <AnimatedSection className="text-center mb-12">
@@ -208,10 +191,10 @@ const About = () => {
           </AnimatedSection>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[{
-            value: '50,000+',
+            value: '10,000+',
             label: 'Students Worldwide'
           }, {
-            value: '200+',
+            value: '100+',
             label: 'Expert Instructors'
           }, {
             value: '95%',
@@ -227,6 +210,59 @@ const About = () => {
               </AnimatedSection>)}
           </div>
         </div>
+        {/* Get in Touch */}
+        <AnimatedSection className="mb-20">
+          <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+            Get in Touch
+          </h2>
+          <div className="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Main Headquarters</h3>
+              <div className="flex items-start mb-3">
+                <MapPinIcon size={18} className="mr-3 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1" />
+                <span className="text-gray-600 dark:text-gray-300">
+                  New Delhi 110080
+                </span>
+              </div>
+              <div className="flex items-center">
+                <MailIcon size={18} className="mr-3 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <a href="mailto:your-official-email@example.com" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  your-official-email@example.com
+                </a>
+              </div>
+            </div>
+            <div className="flex flex-col justify-center">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">Have questions or want to discuss corporate training? Reach out to us!</p>
+              <Button to="/contact" variant="primary">
+                Contact Us Page
+              </Button>
+            </div>
+          </div>
+        </AnimatedSection>
+        {/* FAQ */}
+        <AnimatedSection className="mb-20">
+          <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+            Frequently Asked Questions
+          </h2>
+          <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+            <FaqItem 
+              question="Can I get a refund if I'm not satisfied?"
+              answer="Yes, we offer a money-back guarantee for most of our courses. If you're not satisfied with your purchase, you can request a full refund after the 2 session only days of enrollment. After completing 2 sessions are you not eligible for refund."
+            />
+            <FaqItem 
+              question="Do you offer certificates upon completion?"
+              answer="Yes, all our courses come with a certificate of completion that you can add to your resume or LinkedIn profile."
+            />
+            <FaqItem 
+              question="How long do I have access to course materials?"
+              answer="Once enrolled, you have lifetime access to the course materials, and recordings of sessions including any future updates to the curriculum. You can learn at your own pace and revisit the content whenever you need to."
+            />
+            <FaqItem 
+              question="How can I get help if I'm stuck on a lesson?"
+              answer="We offer multiple support channels for students. You can connect with your training manager or we have internal WhatsApp group for communication or contact our support team directly for assistance."
+            />
+          </div>
+        </AnimatedSection>
         {/* CTA */}
         <AnimatedSection className="text-center">
           <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">
