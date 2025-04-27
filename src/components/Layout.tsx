@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Analytics } from "@vercel/analytics/react"
 import Navbar from './Navbar';
 import Footer from './Footer';
 import ContactPopup from './ContactPopup';
@@ -27,6 +28,7 @@ const Layout: React.FC<LayoutProps> = ({
       <Navbar />
       <main className="flex-grow">{children}</main>
       <Footer />
+      <Analytics />
       <ContactPopup />
     </div>
   );

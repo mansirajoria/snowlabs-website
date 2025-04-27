@@ -27,28 +27,32 @@ Displays the main site navigation, logo, call-to-action button, and dark mode to
 -   **Purpose:** Provides consistent site navigation and branding at the top of each page.
 -   **Features:**
     -   Fixed position at the top (`fixed top-0`).
-    -   Increased height (`h-20`) and adjusted link padding (`py-3`) for better visibility and clickability.
     -   Displays the "SnowLabs" logo linking to Home.
-    -   Renders navigation links (`Home`, `Courses`, `About`, `Contact`) using `react-router-dom`'s `NavLink` for active state styling.
-    -   Includes a "Get Started" `Button`.
-    -   Contains the dark mode toggle button (Sun/Moon icon) which interacts with the `useDarkMode` hook.
-    -   Responsive design with a mobile menu toggle and panel using `framer-motion` for animation (`AnimatePresence`).
-    -   Applies appropriate light/dark mode styles (`bg-white dark:bg-gray-900`, `text-gray-800 dark:text-white`, etc.).
+    -   Renders navigation links (`Home`, `Trainings` (dropdown), `Resources`, `About`, `Contact`) using `react-router-dom`'s `NavLink` for active state styling.
+    -   "Trainings" dropdown lists specific services and includes an "Explore all courses" link at the bottom, linking to `/courses`.
+    -   Includes a "Get Started" `Button` linking to `/contact`.
+    -   Contains the dark mode toggle button (Sun/Moon icon).
+    -   Responsive design with a mobile menu toggle and panel using `framer-motion`.
+    -   Applies appropriate light/dark mode styles.
 -   **Props:** None.
 
 ---
 
 ## `Footer.tsx`
 
-Displays the site footer content.
+Displays the site footer content across multiple columns.
 
 -   **Purpose:** Provides supplementary information, links, and copyright details at the bottom of each page.
 -   **Features:**
-    -   Includes company info, social media links.
-    -   Lists quick links and popular course links.
-    -   Displays contact information.
-    -   Shows copyright year and policy links (Privacy, Terms, Cookies).
-    -   Styled for both light (`bg-gray-200`) and dark (`dark:bg-gray-900`) modes.
+    -   **Layout:** Uses a 4-column grid layout on larger screens.
+    -   **Column 1:** Company name/logo, brief description, contact address (New Delhi HQ).
+    -   **Column 2:** Course category links (ServiceNow, RSA Archer).
+    -   **Column 3:** Course category links (GRC, SAP) and Resource links (Webinars, Blogs, etc.).
+    -   **Column 4:** Company & Legal links (About, Contact, Terms, Privacy, Refund Policy).
+    -   Includes social media icons (LinkedIn, Twitter, Facebook, Instagram).
+    -   Displays the current copyright year.
+    -   Styled for dark mode (`bg-gray-900`).
+    -   Uses a `FooterLink` helper component for consistent link styling.
 -   **Props:** None.
 
 ---
@@ -124,18 +128,19 @@ A wrapper component to apply simple entrance animations to its children.
 
 ## `CourseCard.tsx`
 
-Displays a card representing a course, typically used in course listing pages.
+Displays a card representing a course, used in course listing pages and the Home page.
 
 -   **Purpose:** Standardized presentation for individual courses.
 -   **Features:**
-    -   Displays course image, title, brief description, instructor name/image, rating, duration, and price.
-    -   Updated to display price using the Rupee symbol (`₹`).
-    -   Includes a link to the course detail page.
-    -   Uses `framer-motion` for hover effects (scale) and entrance animation.
+    -   Displays course image, title, description, category, tags, stats (duration, level, students, rating), and price.
+    -   Includes a link to the course detail page (`/courses/:slug`).
+    -   Uses `framer-motion` for hover effects and entrance animation.
     -   Styled for light/dark modes.
--   **Props:** (Assumed based on typical usage, verify actual implementation if needed)
-    -   `course`: Object containing course details (e.g., `id`, `title`, `description`, `imageUrl`, `instructor`, `rating`, `duration`, `price`, `slug`).
-    -   `className?`: `string`
+    -   Can display conditional badges ("Featured" or "Upcoming") based on props.
+-   **Props:**
+    -   `course`: `CourseType` object containing course details.
+    -   `displayType?`: `'trending' | 'upcoming'` - Used to conditionally display the "Upcoming" badge (takes precedence over "Featured" badge).
+    -   `index?`: `number` - Used for staggered animation delay.
 
 ---
 
@@ -145,30 +150,59 @@ A modal popup component designed to capture user contact information.
 
 -   **Purpose:** Presents a non-intrusive way to encourage user contact shortly after site visit.
 -   **Features:**
-    -   Displays after a 5-second delay (`setTimeout` in `useEffect`).
-    -   Uses `localStorage` (`hasClosedContactPopup` item) to ensure it only appears once per browser session.
-    -   Features a two-column layout (on wider screens) with an image (`/public/popup-image.jpeg`) and a contact form.
-    -   Form includes fields for Name, Email, and Message.
-    -   Form submission uses the same Formspree integration as `ContactForm.tsx` (`VITE_FORMSPREE_ENDPOINT`) but adds a `_source: 'popup_form'` field to the submitted data.
-    -   Includes success and error states with appropriate messaging.
-    -   Visually styled with gradients, backdrop blur, input icons, and animations via `framer-motion`.
-    -   Easily dismissible by clicking the backdrop or the close button.
-    -   Uses a high `z-index` (`z-[100]`) to appear above other content like the Navbar.
--   **Integration:** Rendered within `Layout.tsx` to appear on all pages.
+    -   Displays after a 5-second delay (`setTimeout`).
+    -   Uses `localStorage` to appear only once per browser session.
+    -   Features a two-column layout with an image and a contact form.
+    -   Form includes fields for **Email (required)**, **Phone (required)**, and **Message (optional)**.
+    -   Submits data to Formspree endpoint (`VITE_FORMSPREE_ENDPOINT`), adding `_source: 'popup_form'`.
+    -   Includes success and error states.
+    -   Dismissible by clicking backdrop or close button.
+    -   Uses `framer-motion` for animations.
+-   **Integration:** Rendered within `Layout.tsx`.
+-   **Props:** None.
+
+---
+
+## `ScrollToTop.tsx`
+
+A utility component that scrolls the window to the top on route changes.
+
+-   **Purpose:** Fixes the issue where navigating to a new page via `react-router-dom` retains the scroll position of the previous page.
+-   **Features:**
+    -   Uses `useEffect` and `useLocation` hooks.
+    -   Detects changes in `pathname`.
+    -   Calls `document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" })` on path change.
+-   **Integration:** Rendered within the `<Router>` component in `App.tsx`.
 -   **Props:** None.
 
 ---
 
 ## `Page Components (in src/pages/)`
 
-While not reusable components in the same way, it's worth noting updates to page-level components:
+Notes on significant changes to page components:
+
+### `Home.tsx`
+
+-   **Trusted By:** Section refactored to display a looping CSS marquee of company logos from `public/companies/` instead of static text names.
+-   **Trending/Upcoming Courses:** Merged previous "Featured Courses" and removed "Upcoming Courses" logic (from `CourseCategoriesSection`). Now fetches both `featured` and `isUpcoming` courses from Sanity (up to configurable limits) and displays them combined in a single section titled "Trending and Upcoming Courses". Passes a `displayType` prop to `CourseCard` for badge rendering.
+-   **Testimonials:** Placeholder content updated to be more relevant to SnowLabs' offerings.
+-   **Stats:** Updated values in the "Our Impact" section.
 
 ### `CourseDetail.tsx`
 
--   **Data Fetching:** Modified the Sanity GROQ query to fetch the category name (`category->title`) instead of just the reference object.
--   **Rendering:** Updated to display `course.categoryName` instead of `course.category` to fix the "Objects are not valid as a React child" error.
--   **Currency:** Updated to display the course price using the Rupee symbol (`₹`).
+-   **Data Fetching:** Modified Sanity GROQ query to fetch `shortDescription`, `longDescription`, and `testimonials`.
+-   **Rendering:**
+    -   Displays `shortDescription` under "About This Course".
+    -   Renders `longDescription` (Portable Text) in a new "Detailed Overview" section.
+    -   Renders fetched `testimonials` in a new "What Our Students Say" section.
+    -   Enhanced `PortableText` component configuration (`ptComponents`) to handle lists and basic formatting marks.
 
-### `Courses.tsx`
+### `About.tsx`
 
--   Relies on `CourseCard.tsx` for rendering individual courses, inheriting the currency update. No direct currency changes were needed here. 
+-   **Content:** Updated text for "About Us" and "Our Story". Updated stats in "Our Impact".
+-   **Structure:** Removed "Leadership Team" section. Added new sections: "Get in Touch" (with contact details) and "Frequently Asked Questions" (using an accordion style with `FaqItem` helper component).
+
+### `RefundPolicy.tsx` (New)
+
+-   New page component created to display the company's refund and reschedule policy.
+-   Accessible via the `/refund-policy` route. 

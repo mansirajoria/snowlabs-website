@@ -2,26 +2,29 @@
 
 This document describes integrations with external APIs used within the SnowLabs application.
 
-## Formspree (Contact Form)
+## Formspree (Contact Forms)
 
--   **Purpose:** Handles submissions from the contact form on the `/contact` page without requiring a custom backend endpoint.
--   **Integration Point:** `src/components/ContactForm.tsx`
+-   **Purpose:** Handles submissions from the contact forms (main `/contact` page and popup modal) without requiring a custom backend endpoint.
+-   **Integration Points:** 
+    - `src/components/ContactForm.tsx` (main contact page)
+    - `src/components/ContactPopup.tsx` (popup modal)
 -   **Mechanism:**
-    1.  **Endpoint Configuration:** The specific Formspree form endpoint URL is configured via the `VITE_FORMSPREE_ENDPOINT` environment variable in the `.env` file.
-    2.  **Submission:** When the user submits the form, the `handleSubmit` function in `ContactForm.tsx` prevents the default form submission.
-    3.  It then makes an asynchronous `fetch` request (`POST`) to the configured Formspree endpoint.
-    4.  The request headers include `Accept: application/json` and `Content-Type: application/json`.
-    5.  The request body contains the form field data (name, email, phone, message) serialized as a JSON string. If a `courseId` prop was passed to the form, it is included in the submission data as `_courseId`.
-    6.  **Response Handling:**
-        -   If the `fetch` request is successful (response status is OK), the form state is cleared, and the status is set to `'success'` to display a confirmation message.
-        -   If the response status is not OK, or if a network error occurs during the `fetch`, the error is logged to the console, and the form status is set to `'error'` to display an error message.
--   **Setup:** Requires creating a form on [Formspree.io](https://formspree.io/) and adding its unique endpoint URL to the `.env` file.
+    1.  **Endpoint Configuration:** The Formspree endpoint URL is configured via `VITE_FORMSPREE_ENDPOINT` in `.env`.
+    2.  **Submission:** `handleSubmit` functions make an asynchronous `fetch` request (`POST`) to the endpoint.
+    3.  The request body contains form data serialized as JSON.
+        - `ContactForm` sends: name, email, phone (optional), message, and optionally `_courseId`.
+        - `ContactPopup` sends: email, phone, message (optional), and adds `_source: 'popup_form'`.
+    4.  **Response Handling:** Sets form status (`success` or `error`) based on the fetch response.
+-   **Setup:** Requires a Formspree account and form endpoint added to `.env`.
 
-## Formspree (Contact Popup)
+## Sanity.io (Content Management)
 
--   **Purpose:** Handles submissions from the contact popup modal.
--   **Integration Point:** `src/components/ContactPopup.tsx`
--   **Mechanism:** Similar to the main contact form, but with a simpler set of fields (name, email, message).
-    -   Submits data to the same `VITE_FORMSPREE_ENDPOINT`.
-    -   Crucially, it adds a `_source: 'popup_form'` field to the submitted data, allowing differentiation of leads generated via the popup versus the main contact page.
--   **Setup:** Uses the same Formspree endpoint configured for the main contact form. 
+-   **Purpose:** Fetches dynamic content like course details, categories, and potentially other site content.
+-   **Integration Point:** `src/sanityClient.ts` initializes the client using environment variables (`VITE_SANITY_PROJECT_ID`, `VITE_SANITY_DATASET`). Various page/component `useEffect` hooks use this client.
+-   **Mechanism:**
+    -   Components use `client.fetch(GROQ_QUERY, params)` within `useEffect` hooks to retrieve data.
+    -   **Examples:**
+        -   `src/pages/Home.tsx`: Fetches `featured` and `isUpcoming` courses using specific GROQ queries with limits.
+        -   `src/pages/CourseDetail.tsx`: Fetches detailed data for a specific course by slug, including `shortDescription`, `longDescription` (Portable Text), `testimonials`, `modules`, etc.
+        -   `src/pages/Courses.tsx`: Fetches all courses, potentially with filtering.
+-   **Setup:** Requires a Sanity project with the defined schema (courses, categories, etc.) and project ID/dataset configured in `.env`. 
