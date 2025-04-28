@@ -23,16 +23,17 @@ const Navbar = () => {
     setOpenDropdown(null); // Close dropdown on location change
   }, [location]);
 
-  // Updated navItems: Remove 'Courses', keep others
+  // Updated navItems: Remove 'Courses', update Trainings subItem paths
   const navItems: NavItem[] = [
     { name: 'Home', path: '/' },
     {
       name: 'Trainings',
       subItems: [
-        { name: 'ServiceNow', path: '/services/servicenow' },
-        { name: 'GRC', path: '/services/grc' },
-        { name: 'RSA Archer', path: '/services/rsa-archer' },
-        { name: 'SAP', path: '/services/sap' },
+        // Update paths to point to /courses with category query param
+        { name: 'ServiceNow', path: '/courses?category=servicenow-trainings' },
+        { name: 'GRC', path: '/courses?category=grc-trainings' },
+        { name: 'RSA Archer', path: '/courses?category=archer-trainings' },
+        { name: 'SAP', path: '/courses?category=sap-trainings' },
       ],
     },
     { name: 'Resources', path: '/resources' },

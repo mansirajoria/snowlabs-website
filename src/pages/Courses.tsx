@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { SearchIcon, FilterIcon, Loader2 } from 'lucide-react';
 import AnimatedSection from '../components/AnimatedSection';
@@ -34,20 +34,19 @@ interface SanityCourse {
 const Courses = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearchTerm = searchParams.get('search') || '';
-  const initialCategory = searchParams.get('category') || 'All'; // Get initial category slug
+  const initialCategory = searchParams.get('category') || 'All';
   const initialLevel = searchParams.get('level') || 'All';
 
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-  // Selected category state now stores the SLUG
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedLevel, setSelectedLevel] = useState(initialLevel);
   
   const [allCourses, setAllCourses] = useState<SanityCourse[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<SanityCourse[]>([]);
-  const [availableCategories, setAvailableCategories] = useState<SanityCategory[]>([]); // State for fetched categories
+  const [availableCategories, setAvailableCategories] = useState<SanityCategory[]>([]);
   
   const [loading, setLoading] = useState(true);
-  const [loadingCategories, setLoadingCategories] = useState(true); // Loading state for categories
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -101,46 +100,82 @@ const Courses = () => {
     fetchInitialData();
   }, []); // Fetch only once on mount
 
-  // Update URL params when filters change
+  // Effect to synchronize component state *from* URL parameters
   useEffect(() => {
-    const params: Record<string, string> = {};
-    if (searchTerm) params.search = searchTerm;
-    if (selectedLevel !== 'All') params.level = selectedLevel;
-    if (selectedCategory !== 'All') params.category = selectedCategory; // Use category slug
+    const categoryFromUrl = searchParams.get('category') || 'All';
+    const levelFromUrl = searchParams.get('level') || 'All';
+    const searchFromUrl = searchParams.get('search') || '';
+    
+    setSelectedCategory(categoryFromUrl);
+    setSelectedLevel(levelFromUrl);
+    setSearchTerm(searchFromUrl);
+    
+  }, [searchParams]); // Re-run whenever searchParams change
 
-    setSearchParams(params, { replace: true });
-
-  }, [searchTerm, selectedLevel, selectedCategory, setSearchParams]);
-
-
-  // Filter courses based on state (search, level, category)
+  // Filter courses based on URL parameters (derived from searchParams)
   useEffect(() => {
-    if (loading) return; // Don't filter until courses are loaded
+    if (loading) return;
+
+    // Get filter values directly from searchParams for this effect
+    const currentCategory = searchParams.get('category') || 'All';
+    const currentLevel = searchParams.get('level') || 'All';
+    const currentSearch = (searchParams.get('search') || '').toLowerCase();
 
     let result = allCourses;
-    const term = searchTerm.toLowerCase();
 
-    if (term) {
+    if (currentSearch) {
       result = result.filter(course =>
-        course.title.toLowerCase().includes(term)
-        // TODO: Consider searching description, instructor, etc.
+        course.title.toLowerCase().includes(currentSearch)
       );
     }
 
-    if (selectedLevel !== 'All') {
-      const levelLower = selectedLevel.toLowerCase();
+    if (currentLevel !== 'All') {
+      const levelLower = currentLevel.toLowerCase();
       result = result.filter(course => course.difficulty && course.difficulty.toLowerCase() === levelLower);
     }
 
-    if (selectedCategory !== 'All') {
-      // Filter by category slug
-      result = result.filter(course => course.category && course.category.slug === selectedCategory);
+    if (currentCategory !== 'All') {
+      result = result.filter(course => course.category && course.category.slug === currentCategory);
     }
 
     setFilteredCourses(result);
 
-  }, [searchTerm, selectedLevel, selectedCategory, allCourses, loading]); // Depend on all filters and data
+  // Depend on searchParams and the source data/loading state
+  }, [searchParams, allCourses, loading]); 
 
+  // Callback to update search params from UI changes
+  const updateSearchParams = useCallback((updates: Record<string, string | null>) => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === null || value === '' || value === 'All') {
+          newParams.delete(key);
+        } else {
+          newParams.set(key, value);
+        }
+      });
+      return newParams;
+    }, { replace: true });
+  }, [setSearchParams]);
+
+  // Update handlers to call updateSearchParams
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setSearchTerm(newValue);
+    updateSearchParams({ search: newValue });
+  };
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newValue = e.target.value;
+    setSelectedCategory(newValue);
+    updateSearchParams({ category: newValue });
+  };
+  
+  const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newValue = e.target.value;
+    setSelectedLevel(newValue);
+    updateSearchParams({ level: newValue });
+  };
 
   return (
     <div className="w-full pt-28 pb-20 bg-slate-50 dark:bg-gray-900 min-h-screen transition-colors duration-300">
@@ -169,7 +204,7 @@ const Courses = () => {
                   type="text"
                   placeholder="Search courses by title..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchChange}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
                 />
               </div>
@@ -192,9 +227,9 @@ const Courses = () => {
                   </label>
                   <select
                     id="category"
-                    value={selectedCategory} // Use category slug value
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    disabled={loadingCategories} // Disable while loading
+                    value={selectedCategory}
+                    onChange={handleCategoryChange}
+                    disabled={loadingCategories}
                     className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300 disabled:opacity-50"
                   >
                     <option value="All">All Categories</option>
@@ -214,7 +249,7 @@ const Courses = () => {
                   <select
                     id="level"
                     value={selectedLevel}
-                    onChange={(e) => setSelectedLevel(e.target.value)}
+                    onChange={handleLevelChange}
                     className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
                   >
                     {levels.map((level) => (
@@ -248,8 +283,8 @@ const Courses = () => {
                   </label>
                   <select
                     id="mobile-category"
-                    value={selectedCategory} // Use category slug
-                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    value={selectedCategory}
+                    onChange={handleCategoryChange}
                     disabled={loadingCategories}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300 disabled:opacity-50"
                   >
@@ -273,7 +308,7 @@ const Courses = () => {
                   <select
                     id="mobile-level"
                     value={selectedLevel}
-                    onChange={(e) => setSelectedLevel(e.target.value)}
+                    onChange={handleLevelChange}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
                   >
                     {levels.map((level) => (
@@ -325,12 +360,11 @@ const Courses = () => {
                         tags: [],
                     };
                     return (
-                      <Link key={course._id} to={`/courses/${course.slug.current}`}>
-                        <CourseCard
-                            index={index}
-                            course={courseCardProps}
-                        />
-                      </Link>
+                      <CourseCard
+                          key={course._id}
+                          index={index}
+                          course={courseCardProps}
+                      />
                     );
                   })}
                 </div>
