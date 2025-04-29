@@ -313,7 +313,7 @@ const CourseDetail = () => {
               'Learn from industry experts with real-world experience',
               'Work on hands-on projects to build your portfolio',
               'Get personalized feedback on your progress',
-              'Join a community of like-minded learners',
+              'Get career counselling and job placement assistance',
               'Access course materials anytime, anywhere',
             ].map((benefit, index) => (
               <motion.div
