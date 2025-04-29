@@ -137,7 +137,7 @@ const Footer = () => {
              <ul className="space-y-2.5">
                 <FooterLink to="/resources/blogs">Blogs</FooterLink>
                 <FooterLink to="/resources/interview-questions">Interview Questions</FooterLink>
-                <FooterLink to="/resources/mock-tests">Mock Test</FooterLink>
+                <FooterLink to="/resources/mock-test">Mock Test</FooterLink>
                 <FooterLink to="/resources/webinars">Webinars</FooterLink>
             </ul>
           </div>

@@ -6,7 +6,7 @@ import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 
 const WhatsAppChatWidget = () => {
   const [isBubbleVisible, setIsBubbleVisible] = useState(true);
-  const phoneNumber = '918076919970';
+  const phoneNumber = '919211526410';
   const message = encodeURIComponent('Hi Program Manager, I am interested in the training!');
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
 
