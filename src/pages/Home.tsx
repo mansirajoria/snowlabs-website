@@ -12,6 +12,7 @@ import { Pagination, A11y, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
+import ContactForm from '../components/ContactForm';
 
 // Interface for raw data fetched from Sanity
 interface SanityFetchedCourse {
@@ -603,6 +604,58 @@ const Home = () => {
               </Button>
             </div>
           </AnimatedSection>
+        </div>
+      </section>
+
+      {/* Connect with Advisor Section */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-indigo-950 transition-colors duration-300 px-4">
+        <AnimatedSection className="container mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900 dark:text-white">
+            Connect with a Course Advisor
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
+            Have questions about our courses or need guidance on the best path for your career goals? Reach out to our expert advisors today!
+          </p>
+          <div className="max-w-xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 dark:from-blue-800 dark:to-indigo-900 h-5 w-full"></div>
+            <div className="p-6 md:p-8">
+              <ContactForm title="Get Personalized Course Advice" className="shadow-none" />
+            </div>
+          </div>
+        </AnimatedSection>
+      </section>
+
+      {/* Company Logos */}
+      <section className="py-12 md:py-16 bg-white dark:bg-gray-850 transition-colors duration-300 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <h3 className="text-center text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-8">
+            Trusted by professionals at leading companies
+          </h3>
+          <div className="relative flex overflow-hidden group">
+            <div className="flex animate-marquee group-hover:pause whitespace-nowrap">
+              {[...companyLogos, ...companyLogos].map((logo, index) => {
+                // Define base max-height and specific height adjustments
+                const baseHeightClass = "max-h-8 md:max-h-10";
+                const specificHeightClass = "h-10 md:h-12"; // Explicit height for EY & PwC
+                
+                let heightClass = baseHeightClass; // Default
+                if (logo.name === 'EY' || logo.name === 'PwC') {
+                  heightClass = specificHeightClass;
+                }
+                
+                return (
+                  <div key={`${logo.name}-${index}-marquee`} className="mx-8 flex-shrink-0 flex items-center justify-center h-12 md:h-14"> 
+                    <img 
+                      src={logo.src} 
+                      alt={`${logo.name} logo`} 
+                      className={`${heightClass} object-contain w-auto`} // Apply dynamic height class
+                      loading="lazy"
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </div>
       </section>
     </div>;

@@ -289,8 +289,8 @@ const CourseDetail = () => {
                           <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">{module.title}</h3>
                         </div>
                          {module.description && (
-                           <div className="p-4">
-                              <p className="text-gray-600 dark:text-gray-300">{module.description}</p>
+                           <div className="p-4 prose dark:prose-invert max-w-none">
+                              <PortableText value={module.description as any} components={ptComponents} />
                            </div>
                          )}
                       </motion.div>

@@ -110,7 +110,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
             {[
               { id: 'name', label: 'Full Name', type: 'text', placeholder: 'Your name', required: true },
               { id: 'email', label: 'Email Address', type: 'email', placeholder: 'your.email@example.com', required: true },
-              { id: 'phone', label: 'Phone Number (optional)', type: 'tel', placeholder: 'Your phone number', required: false },
+              { id: 'phone', label: 'Phone Number', type: 'tel', placeholder: 'Your phone number', required: true },
             ].map(field => (
               <div key={field.id}>
                 <label htmlFor={field.id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

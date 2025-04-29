@@ -157,7 +157,12 @@ export default defineType({
         type: 'object',
         fields: [
           {name: 'title', type: 'string', title: 'Module Title', validation: (Rule) => Rule.required()},
-          {name: 'description', type: 'text', title: 'Module Description', rows: 2}
+          {
+            name: 'description', 
+            title: 'Module Description', 
+            type: 'array', 
+            of: [{ type: 'block' }] 
+          }
         ]
       }]
     }),

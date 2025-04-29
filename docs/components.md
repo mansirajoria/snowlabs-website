@@ -92,7 +92,7 @@ A form component for user inquiries, integrated with Formspree.
 
 -   **Purpose:** Allows users to send messages via a contact form.
 -   **Features:**
-    -   Collects name, email, phone (optional), and message.
+    -   Collects name (required), email (required), phone (required), and message (required).
     -   Handles form state using `useState`.
     -   Submits data asynchronously to a Formspree endpoint specified by the `VITE_FORMSPREE_ENDPOINT` environment variable.
     -   Displays different states: `idle`, `submitting`, `success`, `error`.
@@ -210,10 +210,11 @@ Notes on significant changes to page components:
 
 ### `CourseDetail.tsx`
 
--   **Data Fetching:** Modified Sanity GROQ query to fetch `shortDescription`, `longDescription`, and `testimonials`.
+-   **Data Fetching:** Modified Sanity GROQ query to fetch `shortDescription`, `longDescription`, `modules` (including description), and `testimonials`.
 -   **Rendering:**
     -   Displays `shortDescription` under "About This Course".
     -   Renders `longDescription` (Portable Text) in a new "Detailed Overview" section.
+    -   Renders `modules.description` (Portable Text) within the Course Syllabus section.
     -   Renders fetched `testimonials` in a new "What Our Students Say" section.
     -   Enhanced `PortableText` component configuration (`ptComponents`) to handle lists and basic formatting marks.
 

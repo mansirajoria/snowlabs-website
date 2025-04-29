@@ -34,7 +34,7 @@ This document describes integrations with external APIs used within the SnowLabs
         -   `src/pages/resources/MockTestPage.tsx`: Fetches all mock tests.
         -   `src/pages/resources/MockTestDetailPage.tsx`: Fetches a single mock test by slug.
 -   **Schemas:** Defined in `sanity/schemas/`. Key schemas include:
-    -   `course.ts`: Course structure.
+    -   `course.ts`: Course structure (title, slug, descriptions, modules, etc.). Module descriptions support rich text.
     -   `category.ts`: Course categories.
     -   `blog.ts`: Blog posts (title, slug, excerpt, body, etc.).
     -   `interviewQuestionSet.ts`: Sets of interview questions (title, slug, questionsList).
