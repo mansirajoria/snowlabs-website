@@ -14,9 +14,22 @@ This document outlines the main folder structure of the SnowLabs website fronten
 │   │   ├── pwc.png
 │   │   └── tcs.png
 │   └── popup-image.jpeg  # Image used in the contact popup
+├── sanity/               # Sanity Studio configuration and schemas
+│   ├── schemas/          # Sanity schema definitions
+│   │   ├── blog.ts
+│   │   ├── category.ts
+│   │   ├── course.ts
+│   │   ├── interviewQuestion.ts
+│   │   ├── interviewQuestionSet.ts
+│   │   ├── mockTest.ts
+│   │   └── mockTestQuestion.ts
+│   ├── sanity.cli.ts     # Sanity CLI configuration
+│   ├── sanity.config.ts  # Sanity Studio configuration
+│   └── schemaTypes/      # Index file exporting schema types
+│       └── index.ts
 ├── src/
 │   ├── components/       # Reusable React components (e.g., Button, Navbar)
-│   │   ├── Layout.tsx
+│   │   ├── Layout.tsx    # (Note: Not used by all pages anymore)
 │   │   ├── Navbar.tsx
 │   │   ├── Footer.tsx
 │   │   ├── Button.tsx
@@ -32,7 +45,14 @@ This document outlines the main folder structure of the SnowLabs website fronten
 │   │   ├── Courses.tsx
 │   │   ├── CourseDetail.tsx
 │   │   ├── Contact.tsx
-│   │   └── RefundPolicy.tsx
+│   │   ├── RefundPolicy.tsx
+│   │   └── resources/      # Resource section pages
+│   │       ├── BlogsListPage.tsx
+│   │       ├── BlogDetailPage.tsx
+│   │       ├── InterviewQuestionsListPage.tsx
+│   │       ├── InterviewQuestionDetailPage.tsx
+│   │       ├── MockTestPage.tsx
+│   │       └── MockTestDetailPage.tsx
 │   ├── assets/           # Project-specific assets (icons, images processed by build tool)
 │   ├── styles/           # Global styles or specific CSS modules (if any, currently mainly index.css)
 │   ├── App.tsx           # Main application component, routing setup
@@ -57,11 +77,15 @@ This document outlines the main folder structure of the SnowLabs website fronten
 -   **`docs/`**: Contains all project documentation files in Markdown format.
 -   **`public/companies/`**: Contains static company logo images used in the Home page marquee.
 -   **`public/`**: Static assets placed here are copied directly to the build output root. Use this for assets that don't need processing by the build tool (e.g., `favicon.ico`, `popup-image.jpeg`).
+-   **`sanity/`**: Contains the configuration and schema definitions for the Sanity Studio.
+    -   **`schemas/`**: Holds the individual schema definitions for content types (e.g., `course.ts`, `blog.ts`).
+    -   **`schemaTypes/index.ts`**: Exports all defined schema types for use in `sanity.config.ts`.
 -   **`src/`**: Contains the main source code of the application.
     -   **`components/`**: Houses reusable UI components shared across different pages (e.g., `Button.tsx`, `Footer.tsx`, `ContactForm.tsx`, `ContactPopup.tsx`).
     -   **`pages/`**: Contains components that represent entire pages or views, mapped to specific routes (e.g., `Home.tsx`, `About.tsx`, `CourseDetail.tsx`).
+    -   **`resources/`**: Subdirectory for the components related to the Resources section (Blogs, Interview Questions, Mock Tests).
     -   **`assets/`**: For assets like images or icons that are imported and potentially processed by Vite during the build.
-    -   **`styles/`**: While most styling is done via Tailwind utility classes, this could hold global styles (`index.css`) or component-specific CSS Modules if needed.
+    -   **`styles/`**: Global styles (`index.css`).
     -   **`App.tsx`**: The root component that sets up the main layout (`Layout.tsx`) and routing using `react-router-dom`.
     -   **`index.tsx`**: The entry point that renders the `App` component into the DOM.
     -   **`index.css`**: Includes Tailwind base, components, and utilities directives, and any custom global CSS.

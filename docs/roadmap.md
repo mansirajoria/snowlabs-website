@@ -33,9 +33,13 @@ This document outlines potential future development steps, planned features, and
 -   **Backend Integration:**
     -   Replace mock/static data for courses with actual data fetched from a backend API.
     -   Develop API endpoints for courses, user data, enrollment, etc.
--   **Blog Section:**
-    -   Create functionality for displaying blog posts.
-    -   Potentially integrate with a Headless CMS (e.g., Contentful, Strapi, Sanity).
+-   **Blog Section:** [COMPLETED - Phase 1]
+    -   Create functionality for displaying blog posts. [DONE]
+    -   Potentially integrate with a Headless CMS (e.g., Contentful, Strapi, Sanity). [DONE - Sanity]
+-   **Resources Section Enhancements:** [COMPLETED - Phase 1]
+    -   Create pages for Interview Questions. [DONE]
+    -   Create pages for Mock Tests (structure/viewing). [DONE]
+    -   Integrate content with Sanity CMS. [DONE]
 
 ## Long-Term Goals & Maintenance
 
@@ -51,9 +55,6 @@ This document outlines potential future development steps, planned features, and
     -   Implement unit tests for components and utility functions.
     -   Add integration tests for user flows.
     -   Consider end-to-end testing (e.g., using Cypress or Playwright).
--   **Deployment & CI/CD:**
-    -   Set up deployment pipelines (e.g., to Netlify, Vercel, AWS).
-    -   Configure Continuous Integration/Continuous Deployment (CI/CD).
 -   **Refactoring & Code Quality:**
     -   Address technical debt.
     -   Refactor components for better reusability and maintainability (e.g., based on reflections during development).

@@ -28,8 +28,9 @@ Displays the main site navigation, logo, call-to-action button, and dark mode to
 -   **Features:**
     -   Fixed position at the top (`fixed top-0`).
     -   Displays the "SnowLabs" logo linking to Home.
-    -   Renders navigation links (`Home`, `Trainings` (dropdown), `Resources`, `About`, `Contact`) using `react-router-dom`'s `NavLink` for active state styling.
+    -   Renders navigation links (`Home`, `Trainings` (dropdown), `Resources` (dropdown), `About`, `Contact`) using `react-router-dom`'s `NavLink` for active state styling.
     -   "Trainings" dropdown lists specific services and includes an "Explore all courses" link at the bottom, linking to `/courses`.
+    -   "Resources" dropdown links to `/resources/interview-questions`, `/resources/mock-test`, and `/resources/blogs`.
     -   Includes a "Get Started" `Button` linking to `/contact`.
     -   Contains the dark mode toggle button (Sun/Moon icon).
     -   Responsive design with a mobile menu toggle and panel using `framer-motion`.
@@ -180,6 +181,25 @@ A utility component that scrolls the window to the top on route changes.
 ## `Page Components (in src/pages/)`
 
 Notes on significant changes to page components:
+
+### **New Resource Pages (`src/pages/resources/`)**
+
+-   **Structure:** Following the pattern of `Courses.tsx` and `About.tsx`, these pages do *not* use the shared `Layout.tsx` component.
+    -   They include `<Navbar/>` and `<Footer/>` directly.
+    -   They apply top padding (`pt-28`) and background styles (`bg-slate-50 dark:bg-gray-950 min-h-screen`) to their own root `div` to handle layout below the fixed navbar.
+-   **`InterviewQuestionsListPage.tsx` & `InterviewQuestionDetailPage.tsx`:**
+    -   List and Detail views for sets of interview questions.
+    -   Fetches content from Sanity based on `interviewQuestionSet` schema.
+    -   Uses `PortableText` to render question answers.
+-   **`MockTestPage.tsx` & `MockTestDetailPage.tsx`:**
+    -   List and Detail views for mock tests.
+    -   Fetches content from Sanity based on `mockTest` schema.
+    -   Detail page displays questions/options/explanations in a read-only format.
+    -   List page shows a "Coming Soon" message if no tests are published.
+-   **`BlogsListPage.tsx` & `BlogDetailPage.tsx`:**
+    -   List and Detail views for blog posts.
+    -   Fetches content from Sanity based on `blog` schema.
+    -   Uses `PortableText` to render blog body content, including images.
 
 ### `Home.tsx`
 

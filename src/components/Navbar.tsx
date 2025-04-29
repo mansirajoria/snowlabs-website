@@ -36,7 +36,14 @@ const Navbar = () => {
         { name: 'SAP', path: '/courses?category=sap-trainings' },
       ],
     },
-    { name: 'Resources', path: '/resources' },
+    {
+      name: 'Resources',
+      subItems: [
+        { name: 'Interview Questions', path: '/resources/interview-questions' },
+        { name: 'Mock Test', path: '/resources/mock-test' },
+        { name: 'Blogs', path: '/resources/blogs' },
+      ],
+    },
     { name: 'About', path: '/about' },
     { name: 'Contact', path: '/contact' },
   ];

@@ -46,4 +46,8 @@ Page transitions and component entrance animations are primarily handled using t
 ## Z-Index Management
 
 -   For layered components like modals or popups, ensure appropriate `z-index` values are used.
-    -   The `ContactPopup.tsx` uses `z-[100]` to ensure it appears above the `Navbar` (which typically has `z-50`). 
+    -   The `ContactPopup.tsx` uses `z-[100]` to ensure it appears above the `Navbar` (which typically has `z-50`).
+
+## Page-Specific Layout Considerations
+
+-   While `Layout.tsx` provides a base, some pages (like `Home.tsx`) may use it directly, while others (like `Courses.tsx`, `About.tsx`, and all pages under `src/pages/resources/`) manage their own layout structure, including Navbar/Footer and top padding (`pt-28`) to accommodate the fixed navbar. 

@@ -10,6 +10,14 @@ import Contact from './pages/Contact';
 import ScrollToTop from './components/ScrollToTop';
 import RefundPolicy from './pages/RefundPolicy';
 
+// Import new resource pages
+import InterviewQuestionsListPage from './pages/resources/InterviewQuestionsListPage';
+import InterviewQuestionDetailPage from './pages/resources/InterviewQuestionDetailPage';
+import MockTestPage from './pages/resources/MockTestPage';
+import MockTestDetailPage from './pages/resources/MockTestDetailPage';
+import BlogsListPage from './pages/resources/BlogsListPage';
+import BlogDetailPage from './pages/resources/BlogDetailPage';
+
 export function App() {
   return <Router>
       <ScrollToTop />
@@ -22,6 +30,13 @@ export function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
+
+            <Route path="/resources/interview-questions" element={<InterviewQuestionsListPage />} />
+            <Route path="/resources/interview-questions/:slug" element={<InterviewQuestionDetailPage />} />
+            <Route path="/resources/mock-test" element={<MockTestPage />} />
+            <Route path="/resources/mock-test/:slug" element={<MockTestDetailPage />} />
+            <Route path="/resources/blogs" element={<BlogsListPage />} />
+            <Route path="/resources/blogs/:slug" element={<BlogDetailPage />} />
           </Routes>
         </AnimatePresence>
       </Layout>
