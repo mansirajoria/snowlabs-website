@@ -1,6 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FacebookIcon, TwitterIcon, InstagramIcon, LinkedinIcon, MailIcon, PhoneIcon, MapPinIcon } from 'lucide-react';
+import client from '../sanityClient'; // Import Sanity client
+
+// Interface for fetched course data
+interface FooterCourse {
+  _id: string;
+  title: string;
+  slug: { current: string };
+}
 
 // Define helper function or component for list items if needed, or use direct Links
 const FooterLink = ({ to, children }: { to: string, children: React.ReactNode }) => (
@@ -16,43 +24,36 @@ const FooterLink = ({ to, children }: { to: string, children: React.ReactNode })
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [courses, setCourses] = useState<FooterCourse[]>([]);
 
-  // Define course categories based on your input
-  const courseCategories = {
-    "ServiceNow": [
-      "ServiceNow IRM/GRC",
-      "ServiceNow ITSM",
-      "ServiceNow TPRM",
-      "ServiceNow ITOM",
-      "ServiceNow ITBM",
-      "ServiceNow CSM",
-      "ServiceNow HRSD",
-      "ServiceNow SecOps",
-    ],
-    "RSA ARCHER": [
-      "RSA ARCHER", // Assuming this links to a general Archer page
-      "ARCHER API",
-    ],
-    "GRC Trainings": [
-      "GRC Core Training for Beginners",
-      "GRC Functional", // Removed bullet
-    ],
-    "SAP": [
-      "SAP S/4HANA Finance (Simple Finance)", // Removed bullet
-      "SAP MM (Materials Management)", // Removed bullet
-      "SAP GRC", // Removed bullet
-      // Add other SAP courses if needed
-    ],
-  };
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        // Fetch featured courses first, ordered by title
+        const featuredQuery = `*[_type == "course" && featured == true]{ _id, title, slug, featured } | order(title asc)`;
+        // Fetch non-featured courses (including those where featured might be null/undefined), ordered by title
+        const nonFeaturedQuery = `*[_type == "course" && (!defined(featured) || featured == false)]{ _id, title, slug, featured } | order(title asc)`;
+        
+        const [featuredData, nonFeaturedData] = await Promise.all([
+          client.fetch<FooterCourse[]>(featuredQuery),
+          client.fetch<FooterCourse[]>(nonFeaturedQuery)
+        ]);
 
-  // Helper to generate slugs (simple version, reuse if available elsewhere)
-  const slugify = (text: string): string => {
-    return text
-      .toLowerCase()
-      .replace(/[^a-z0-9 -]/g, '') // Remove invalid chars
-      .replace(/\s+/g, '-') // Collapse whitespace and replace by -
-      .replace(/-+/g, '-'); // Collapse dashes
-  };
+        // Combine the arrays, ensuring featured are first
+        setCourses([...featuredData, ...nonFeaturedData]);
+      } catch (error) {
+        console.error("Failed to fetch courses for footer:", error);
+        setCourses([]); 
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  // Split courses for distribution across columns (simple split)
+  const midPoint = Math.ceil(courses.length / 2);
+  const firstHalfCourses = courses.slice(0, midPoint);
+  const secondHalfCourses = courses.slice(midPoint);
 
   return (
     <footer className="bg-gray-900 text-gray-300 pt-16 pb-8">
@@ -87,6 +88,17 @@ const Footer = () => {
             <p className="text-gray-400 leading-relaxed mb-5">
               Empowering professionals worldwide with expert-led training in ServiceNow, GRC, Archer, and SAP.
             </p>
+            {/* Added Contact Info */}
+            <div className="space-y-2.5 mb-5">
+              <a href="mailto:training@snowlabs.com" className="flex items-center text-gray-400 hover:text-white transition-colors duration-200">
+                <MailIcon size={14} className="mr-2 text-gray-500 flex-shrink-0" />
+                training@snowlabs.com
+              </a>
+              <a href="tel:+919211526410" className="flex items-center text-gray-400 hover:text-white transition-colors duration-200">
+                <PhoneIcon size={14} className="mr-2 text-gray-500 flex-shrink-0" />
+                +91 9211 526410
+              </a>
+            </div>
             <h5 className="mb-2 font-medium text-gray-200">New Delhi HQ</h5>
             <p className="text-gray-400 leading-relaxed flex items-start">
               <MapPinIcon size={14} className="mr-2 mt-1 text-gray-500 flex-shrink-0" />
@@ -94,51 +106,49 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Column 2: Courses (ServiceNow & Archer) */}
+          {/* Column 2: Courses (First Half) */}
           <div>
             <h4 className="text-white font-semibold uppercase tracking-wider mb-5 text-sm">Trainings</h4>
             <ul className="space-y-2.5">
-              {courseCategories["ServiceNow"].map(course => (
-                <FooterLink key={course} to={`/courses/${slugify(course)}`}>{course}</FooterLink>
-              ))}
-              {courseCategories["RSA ARCHER"].map(course => (
-                <FooterLink key={course} to={`/courses/${slugify(course)}`}>{course}</FooterLink>
-              ))}
+              {firstHalfCourses.length > 0 ? (
+                firstHalfCourses.map(course => (
+                  <FooterLink key={course._id} to={`/courses/${course.slug.current}`}>{course.title}</FooterLink>
+                ))
+              ) : (
+                <li className="text-gray-500 text-sm">Loading courses...</li>
+              )}
             </ul>
           </div>
 
-          {/* Column 3: Courses (GRC & SAP) & Resources */}
+          {/* Column 3: Courses (Second Half) & Resources */}
           <div>
              <h4 className="text-white font-semibold uppercase tracking-wider mb-5 text-sm">More Trainings & Resources</h4>
              {/* GRC & SAP */}
              <ul className="space-y-2.5 mb-6">
-               {courseCategories["GRC Trainings"].map(course => (
-                  <FooterLink key={course} to={`/courses/${slugify(course)}`}>{course}</FooterLink>
-                ))}
-                {courseCategories["SAP"].map(course => (
-                  <FooterLink key={course} to={`/courses/${slugify(course)}`}>{course}</FooterLink>
-                ))}
+              {secondHalfCourses.length > 0 ? (
+                secondHalfCourses.map(course => (
+                  <FooterLink key={course._id} to={`/courses/${course.slug.current}`}>{course.title}</FooterLink>
+                ))
+              ) : (
+                <li className="text-gray-500 text-sm"> </li>
+              )}
              </ul>
-             {/* Resources List */}
+             {/* Resources List - Updated */}
              <ul className="space-y-2.5">
-                <FooterLink to="/resources/webinars">Webinars</FooterLink>
                 <FooterLink to="/resources/blogs">Blogs</FooterLink>
                 <FooterLink to="/resources/interview-questions">Interview Questions</FooterLink>
-                <FooterLink to="/resources/tutorials">Tutorials</FooterLink>
                 <FooterLink to="/resources/mock-tests">Mock Test</FooterLink>
+                <FooterLink to="/resources/webinars">Webinars</FooterLink>
             </ul>
           </div>
 
-          {/* Column 4: Company & Legal */}
+          {/* Column 4: Company & Legal - Updated */}
           <div>
             <h4 className="text-white font-semibold uppercase tracking-wider mb-5 text-sm">Company</h4>
             <ul className="space-y-2.5">
               <FooterLink to="/about">About Us</FooterLink>
               <FooterLink to="/contact">Contact Us</FooterLink>
-              <FooterLink to="/terms-and-conditions">Terms and Conditions</FooterLink>
-              <FooterLink to="/privacy-policy">Privacy Policy</FooterLink>
               <FooterLink to="/refund-policy">Refund Policy</FooterLink>
-              {/* <FooterLink to="/careers">Careers</FooterLink> */} 
             </ul>
           </div>
           
@@ -149,11 +159,6 @@ const Footer = () => {
           <p className="text-gray-500 text-xs">
             © {currentYear} SnowLabs. All rights reserved.
           </p>
-          {/* Optional: Can add bottom links here too if preferred over the column */}
-          {/* <div className="mt-2 flex justify-center space-x-4">
-            <Link to="/privacy-policy" className="text-xs text-gray-500 hover:text-white">Privacy Policy</Link>
-            <Link to="/terms-and-conditions" className="text-xs text-gray-500 hover:text-white">Terms</Link>
-          </div> */}
         </div>
       </div>
     </footer>

@@ -39,9 +39,10 @@ const Navbar = () => {
     {
       name: 'Resources',
       subItems: [
+        { name: 'Blogs', path: '/resources/blogs' },
         { name: 'Interview Questions', path: '/resources/interview-questions' },
         { name: 'Mock Test', path: '/resources/mock-test' },
-        { name: 'Blogs', path: '/resources/blogs' },
+        { name: 'Webinars', path: '/resources/webinars' },
       ],
     },
     { name: 'About', path: '/about' },
@@ -136,6 +137,7 @@ const Navbar = () => {
                             </NavLink>
                           ))}
                           {/* Add Explore All Courses Link/Button below subItems */}
+                          {/* REMOVED the Explore All Courses Link from Trainings dropdown
                           <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                           <Link 
                             to="/courses"
@@ -145,6 +147,7 @@ const Navbar = () => {
                           >
                             Explore all courses
                           </Link>
+                          */}
                         </div>
                       </motion.div>
                     )}

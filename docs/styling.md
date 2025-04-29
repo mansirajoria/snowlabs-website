@@ -36,6 +36,11 @@ The application supports a light/dark mode toggle.
     -   Base dark background and text colors are applied in `src/components/Layout.tsx`.
     -   Individual components and page elements must include their own `dark:` variants for colors, backgrounds, borders, etc., where needed.
 
+## Icons
+
+-   The primary icon library used is [Lucide React](https://lucide.dev/). Icons are imported directly into components (e.g., `import { CheckIcon } from 'lucide-react';`).
+-   For specific icons not available in Lucide (like social media brand icons), [Font Awesome](https://fontawesome.com/) is used via `@fortawesome/react-fontawesome`. This requires installing relevant Font Awesome packages (see `docs/setup.md`).
+
 ## Animation
 
 Page transitions and component entrance animations are primarily handled using the [Framer Motion](https://www.framer.com/motion/) library.

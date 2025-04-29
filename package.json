@@ -10,6 +10,9 @@
     "preview": "npx vite preview"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-brands-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@portabletext/react": "^3.2.1",
     "@sanity/client": "^6.29.0",
     "@sanity/image-url": "^1.1.0",
@@ -19,6 +22,7 @@
     "lucide-react": "^0.441.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-player": "^2.16.0",
     "react-router-dom": "^6.26.2",
     "swiper": "^11.2.6",
     "usehooks-ts": "^3.1.1"

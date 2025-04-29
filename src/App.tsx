@@ -17,6 +17,8 @@ import MockTestPage from './pages/resources/MockTestPage';
 import MockTestDetailPage from './pages/resources/MockTestDetailPage';
 import BlogsListPage from './pages/resources/BlogsListPage';
 import BlogDetailPage from './pages/resources/BlogDetailPage';
+import WebinarsListPage from './pages/resources/WebinarsListPage';
+import WebinarDetailPage from './pages/resources/WebinarDetailPage';
 
 export function App() {
   return <Router>
@@ -37,6 +39,9 @@ export function App() {
             <Route path="/resources/mock-test/:slug" element={<MockTestDetailPage />} />
             <Route path="/resources/blogs" element={<BlogsListPage />} />
             <Route path="/resources/blogs/:slug" element={<BlogDetailPage />} />
+
+            <Route path="/resources/webinars" element={<WebinarsListPage />} />
+            <Route path="/resources/webinars/:slug" element={<WebinarDetailPage />} />
           </Routes>
         </AnimatePresence>
       </Layout>

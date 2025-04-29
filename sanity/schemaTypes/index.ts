@@ -8,6 +8,8 @@ import interviewQuestion from '../schemas/interviewQuestion' // Object type
 import interviewQuestionSet from '../schemas/interviewQuestionSet' // Document type for sets of questions
 import mockTest from '../schemas/mockTest'
 import mockTestQuestion from '../schemas/mockTestQuestion' // Object type
+import webinar from '../schemas/webinar' // Import the new webinar schema
+import testimonial from '../schemas/testimonial' // Import the new testimonial schema
 
 export const schemaTypes = [
     // Existing schemas
@@ -19,6 +21,8 @@ export const schemaTypes = [
     mockTest, // Specific mock test schema (Document)
     // interviewQuestionsPage, // Replaced by Set
     interviewQuestionSet, // Specific Interview Qs set schema (Document)
+    webinar, // Add webinar to the exported array
+    testimonial, // Add testimonial schema
     // Object types used within other schemas
     interviewQuestion, 
     mockTestQuestion, 

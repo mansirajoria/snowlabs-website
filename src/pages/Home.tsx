@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRightIcon, CheckIcon, TrendingUpIcon, UsersIcon, BookOpenIcon, AwardIcon, Loader2, SearchIcon } from 'lucide-react';
+import { ArrowRightIcon, CheckIcon, TrendingUpIcon, UsersIcon, BookOpenIcon, AwardIcon, Loader2, SearchIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import Button from '../components/Button';
 import AnimatedSection from '../components/AnimatedSection';
 import CourseCard, { CourseType } from '../components/CourseCard';
 import CourseCategoriesSection from '../components/CourseCategoriesSection';
 import client from '../sanityClient';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, A11y, Autoplay } from 'swiper/modules';
+import { Pagination, Navigation, A11y, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
-import 'swiper/css/autoplay';
+import 'swiper/css/navigation';
 import ContactForm from '../components/ContactForm';
 
 // Interface for raw data fetched from Sanity
@@ -56,6 +56,15 @@ interface DisplayCourse {
   _id: string;
 }
 
+// Interface for fetched testimonial data
+interface SanityTestimonial {
+  _id: string;
+  quote: string;
+  authorName: string;
+  authorRole?: string;
+  authorImageUrl?: string;
+}
+
 // Configurable limits
 const TRENDING_LIMIT = 3;
 const UPCOMING_LIMIT = 3;
@@ -74,6 +83,9 @@ const Home = () => {
   const [combinedCourses, setCombinedCourses] = useState<DisplayCourse[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [errorCourses, setErrorCourses] = useState<string | null>(null);
+  const [testimonials, setTestimonials] = useState<SanityTestimonial[]>([]); // State for testimonials
+  const [loadingTestimonials, setLoadingTestimonials] = useState(true); // Loading state for testimonials
+  const [errorTestimonials, setErrorTestimonials] = useState<string | null>(null); // Error state for testimonials
   const [heroSearchTerm, setHeroSearchTerm] = useState('');
   const navigate = useNavigate();
 
@@ -143,8 +155,35 @@ const Home = () => {
         setLoadingCourses(false);
       }
     };
+
+    // --- Fetch Testimonials Logic (new) ---
+    const fetchTestimonials = async () => {
+      setLoadingTestimonials(true);
+      setErrorTestimonials(null);
+      try {
+        // Fetch testimonials marked for homepage display
+        const query = `*[_type == "testimonial" && displayOnHomepage == true]{
+          _id,
+          quote,
+          authorName,
+          authorRole,
+          "authorImageUrl": authorImage.asset->url
+        }[0...3]`; // Limit to 3 for the homepage
+        const data = await client.fetch<SanityTestimonial[]>(query);
+        setTestimonials(data);
+      } catch (err) {
+        console.error("Failed to fetch testimonials:", err);
+        setErrorTestimonials("Failed to load testimonials.");
+      } finally {
+        setLoadingTestimonials(false);
+      }
+    };
+
+    // Call both fetch functions
     fetchCombinedCourses();
-  }, []);
+    fetchTestimonials();
+
+  }, []); // Combined dependency array
 
   // Updated function for search submission
   const handleHeroSearch = (e: React.FormEvent) => {
@@ -338,48 +377,56 @@ const Home = () => {
               <p>{errorCourses}</p>
             </div>
           ) : combinedCourses.length > 0 ? (
-            <div className="relative">
-              {/* Desktop Grid - Pass course and displayType */}
-              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="relative group">
+              <Swiper
+                modules={[Pagination, Navigation, A11y, Autoplay]}
+                spaceBetween={30}
+                slidesPerView={1}
+                navigation={{
+                  nextEl: '.swiper-button-next-custom',
+                  prevEl: '.swiper-button-prev-custom',
+                }}
+                pagination={{ clickable: true, dynamicBullets: true }}
+                grabCursor={true}
+                autoplay={{
+                  delay: 4000,
+                  disableOnInteraction: true,
+                  pauseOnMouseEnter: true,
+                }}
+                loop={combinedCourses.length > 3}
+                className="pb-16"
+                breakpoints={{
+                  // when window width is >= 768px (md)
+                  768: {
+                    slidesPerView: 2,
+                    spaceBetween: 20
+                  },
+                  // when window width is >= 1024px (lg)
+                  1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 30
+                  }
+                }}
+              >
                 {combinedCourses.map((course, index) => (
-                  <CourseCard 
-                    key={course._id} 
-                    course={course} // Pass the object matching CourseType implicitly
-                    displayType={course.displayType} // Pass displayType separately
-                    index={index} 
-                  />
+                  <SwiperSlide key={course._id} className="h-full pb-4">
+                    <div className="h-full">
+                      <CourseCard 
+                        course={course} 
+                        displayType={course.displayType}
+                        index={index} 
+                      />
+                    </div>
+                  </SwiperSlide>
                 ))}
-              </div>
-
-              {/* Mobile Carousel - Pass course and displayType */}
-              <div className="md:hidden -mx-4 px-4">
-                <Swiper
-                  modules={[Pagination, A11y, Autoplay]}
-                  spaceBetween={16}
-                  slidesPerView={1.2}
-                  pagination={{ clickable: true, dynamicBullets: true }}
-                  grabCursor={true}
-                  autoplay={{
-                    delay: 3500,
-                    disableOnInteraction: true,
-                    pauseOnMouseEnter: true,
-                  }}
-                  loop={true}
-                  className="pb-16"
-                >
-                  {combinedCourses.map((course, index) => (
-                    <SwiperSlide key={course._id} className="h-full">
-                      <div className="h-full">
-                        <CourseCard 
-                          course={course} 
-                          displayType={course.displayType}
-                          index={index} 
-                        />
-                      </div>
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-              </div>
+              </Swiper>
+              {/* Custom Navigation Arrows - Positioned outside */}
+              <button className="swiper-button-prev-custom absolute top-1/2 -left-4 md:-left-6 transform -translate-y-1/2 z-10 p-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full shadow-md transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer">
+                <ChevronLeftIcon className="text-gray-700 dark:text-gray-200" />
+              </button>
+              <button className="swiper-button-next-custom absolute top-1/2 -right-4 md:-right-6 transform -translate-y-1/2 z-10 p-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full shadow-md transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer">
+                <ChevronRightIcon className="text-gray-700 dark:text-gray-200" />
+              </button>
             </div>
            ) : (
              <p className="text-center text-gray-500 dark:text-gray-400">No courses available at the moment.</p>
@@ -392,6 +439,97 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Connect with Advisor Section - MOVED HERE */}
+      <section className="py-10 md:py-16 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-indigo-950 transition-colors duration-300 px-4">
+        <AnimatedSection className="container mx-auto max-w-6xl text-center">
+          <div className="mb-8 md:mb-10 max-w-3xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3 text-gray-900 dark:text-white">
+              Connect with a Course Advisor
+            </h2>
+            <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Have questions about our courses or need guidance on the best path for your career goals?
+            </p>
+          </div>
+          
+          <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 dark:from-blue-800 dark:to-indigo-900 h-2 w-full"></div>
+            <div className="p-6 md:p-8">
+              {/* Custom 2x2 Grid Form Layout */}
+              <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Full Name
+                  </label>
+                  <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                    placeholder="Your name" 
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Email Address
+                  </label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                    placeholder="your.email@example.com" 
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Phone Number
+                  </label>
+                  <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                    placeholder="Your phone number" 
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Message
+                  </label>
+                  <textarea 
+                    id="message" 
+                    name="message" 
+                    required 
+                    rows={3} 
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+                    placeholder="How can we help you?" 
+                  />
+                </div>
+                
+                <div className="col-span-1 md:col-span-2 mt-2">
+                  <button 
+                    type="submit" 
+                    className="w-full md:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 text-white font-medium rounded-lg transition-colors duration-300 flex items-center justify-center"
+                  >
+                    <span>Send Message</span>
+                    <svg className="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+         </AnimatedSection>
+       </section>
+
       {/* Course Categories Section */}
       <CourseCategoriesSection />
       
@@ -409,24 +547,25 @@ const Home = () => {
           
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
             {[
-              { title: 'Blogs', icon: <BookOpenIcon size={24} /> },
-              { title: 'Interview Questions', icon: <CheckIcon size={24} /> },
-              { title: 'Mock Test', icon: <ArrowRightIcon size={24} /> },
-              { title: 'Tutorial', icon: <TrendingUpIcon size={24} /> },
-              { title: 'Webinars', icon: <UsersIcon size={24} /> }
+              { title: 'Blogs', icon: <BookOpenIcon size={24} />, link: '/resources/blogs' },
+              { title: 'Interview Questions', icon: <CheckIcon size={24} />, link: '/resources/interview-questions' },
+              { title: 'Mock Test', icon: <ArrowRightIcon size={24} />, link: '/resources/mock-tests' },
+              { title: 'Tutorial', icon: <TrendingUpIcon size={24} />, link: '/resources/tutorials' },
+              { title: 'Webinars', icon: <UsersIcon size={24} />, link: '/resources/webinars' }
             ].map((resource, index) => (
-              <AnimatedSection 
-                key={index}
-                delay={index * 0.1} 
-                className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-all duration-300"
-              >
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-3 text-blue-600 dark:text-blue-400">
-                  {resource.icon}
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white text-center">
-                  {resource.title}
-                </h3>
-              </AnimatedSection>
+              <Link to={resource.link} key={resource.title} className="block group">
+                <AnimatedSection 
+                  delay={index * 0.1} 
+                  className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg group-hover:shadow-lg group-hover:bg-gray-100 dark:group-hover:bg-gray-700 transition-all duration-300 h-full"
+                >
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-3 text-blue-600 dark:text-blue-400 flex-shrink-0">
+                    {resource.icon}
+                  </div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-center text-sm md:text-base">
+                    {resource.title}
+                  </h3>
+                </AnimatedSection>
+              </Link>
             ))}
           </div>
         </div>
@@ -549,39 +688,49 @@ const Home = () => {
               What Our Students Say
             </h2>
             <p className="text-blue-100 max-w-2xl mx-auto">
-              Hear from our students who have transformed their careers through
-              our courses.
+              Hear from our students who have transformed their careers through our courses.
             </p>
           </AnimatedSection>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[{
-            name: 'Jessica Miller',
-            role: 'ServiceNow Developer',
-            image: 'https://randomuser.me/api/portraits/women/44.jpg',
-            text: 'SnowLabs ServiceNow training was incredibly thorough. The hands-on projects gave me the confidence I needed, and I quickly found a great role after completion.'
-          }, {
-            name: 'Michael Johnson',
-            role: 'GRC Consultant',
-            image: 'https://randomuser.me/api/portraits/men/32.jpg',
-            text: "The Archer and GRC courses were exactly what I needed to pivot my career. The instructors were experts and the practical approach made learning complex topics manageable."
-          }, {
-            name: 'Sophia Chen',
-            role: 'SAP Analyst',
-            image: 'https://randomuser.me/api/portraits/women/65.jpg',
-            text: 'Excellent SAP course content and fantastic support from the training manager. The lifetime access to materials is a huge plus for staying updated.'
-          }].map((testimonial, index) => <AnimatedSection key={index} delay={index * 0.1} className="bg-white/10 dark:bg-gray-900/30 backdrop-blur-lg p-6 rounded-xl text-white">
-                <div className="flex items-center mb-4">
-                  <img src={testimonial.image} alt={testimonial.name} className="w-14 h-14 rounded-full mr-4" />
-                  <div>
-                    <h4 className="font-semibold text-lg text-white">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-blue-200 dark:text-blue-300 text-sm">{testimonial.role}</p>
+          
+          {/* Loading/Error/Display Logic for Testimonials */}
+          {loadingTestimonials ? (
+            <div className="flex justify-center items-center py-10">
+              <Loader2 className="animate-spin text-white" size={36} />
+            </div>
+          ) : errorTestimonials ? (
+            <div className="text-center py-10 text-red-300">
+              <p>{errorTestimonials}</p>
+            </div>
+          ) : testimonials.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {testimonials.map((testimonial, index) => (
+                <AnimatedSection 
+                  key={testimonial._id} 
+                  delay={index * 0.1} 
+                  className="bg-white/10 dark:bg-gray-900/30 backdrop-blur-lg p-6 rounded-xl text-white flex flex-col h-full"
+                >
+                  <p className="italic text-blue-50 dark:text-gray-200 mb-6 flex-grow">"{testimonial.quote}"</p>
+                  <div className="flex items-center mt-auto">
+                    <img 
+                      src={testimonial.authorImageUrl || 'https://via.placeholder.com/150/771796'} // Placeholder image
+                      alt={testimonial.authorName} 
+                      className="w-12 h-12 rounded-full mr-4 object-cover bg-gray-500"
+                     />
+                    <div>
+                      <h4 className="font-semibold text-lg text-white">
+                        {testimonial.authorName}
+                      </h4>
+                      {testimonial.authorRole && (
+                        <p className="text-blue-200 dark:text-blue-300 text-sm">{testimonial.authorRole}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <p className="italic text-blue-50 dark:text-gray-200">"{testimonial.text}"</p>
-              </AnimatedSection>)}
-          </div>
+                </AnimatedSection>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-blue-100">No testimonials available yet.</p>
+          )}
         </div>
       </section>
       {/* CTA Section */}
@@ -605,24 +754,6 @@ const Home = () => {
             </div>
           </AnimatedSection>
         </div>
-      </section>
-
-      {/* Connect with Advisor Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-indigo-950 transition-colors duration-300 px-4">
-        <AnimatedSection className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900 dark:text-white">
-            Connect with a Course Advisor
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
-            Have questions about our courses or need guidance on the best path for your career goals? Reach out to our expert advisors today!
-          </p>
-          <div className="max-w-xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 dark:from-blue-800 dark:to-indigo-900 h-5 w-full"></div>
-            <div className="p-6 md:p-8">
-              <ContactForm title="Get Personalized Course Advice" className="shadow-none" />
-            </div>
-          </div>
-        </AnimatedSection>
       </section>
 
       {/* Company Logos */}

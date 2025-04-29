@@ -41,4 +41,6 @@ This document describes integrations with external APIs used within the SnowLabs
     -   `interviewQuestion.ts`: Individual question/answer object (used in `interviewQuestionSet`).
     -   `mockTest.ts`: Mock tests (title, slug, description, instructions, questions).
     -   `mockTestQuestion.ts`: Individual mock test question object (question, options, explanation - used in `mockTest`).
+    -   `webinar.ts`: Webinars (title, slug, youtubeVideoUrl, description, etc.).
+    -   `testimonial.ts`: Testimonials (quote, authorName, authorRole, authorImage, displayOnHomepage).
 -   **Setup:** Requires a Sanity project with the defined schemas and project ID/dataset configured in `.env`. 

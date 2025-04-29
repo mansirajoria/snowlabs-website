@@ -12,6 +12,7 @@ Provides the main structure for all pages, including the Navbar, Footer, and the
 -   **Features:**
     -   Renders `Navbar` and `Footer`.
     -   Renders the `ContactPopup` component to display it globally.
+    -   Renders the `WhatsAppChatWidget` component globally.
     -   Wraps the page content (`children`).
     -   Implements the core dark mode logic using `useDarkMode` hook from `usehooks-ts` to toggle the `dark` class on the `<html>` element.
     -   Applies base background colors for light (`bg-slate-50`) and dark (`dark:bg-gray-950`) modes to the main container.
@@ -30,7 +31,7 @@ Displays the main site navigation, logo, call-to-action button, and dark mode to
     -   Displays the "SnowLabs" logo linking to Home.
     -   Renders navigation links (`Home`, `Trainings` (dropdown), `Resources` (dropdown), `About`, `Contact`) using `react-router-dom`'s `NavLink` for active state styling.
     -   "Trainings" dropdown lists specific services and includes an "Explore all courses" link at the bottom, linking to `/courses`.
-    -   "Resources" dropdown links to `/resources/interview-questions`, `/resources/mock-test`, and `/resources/blogs`.
+    -   "Resources" dropdown links to `/resources/interview-questions`, `/resources/mock-test`,`/resources/blogs` and `/resources/webinars`.
     -   Includes a "Get Started" `Button` linking to `/contact`.
     -   Contains the dark mode toggle button (Sun/Moon icon).
     -   Responsive design with a mobile menu toggle and panel using `framer-motion`.
@@ -164,6 +165,20 @@ A modal popup component designed to capture user contact information.
 
 ---
 
+## `WhatsAppChatWidget.tsx` (New)
+
+-   **Purpose:** Provides a persistent floating button to initiate a WhatsApp chat.
+-   **Features:**
+    -   Fixed position at the bottom-right (`fixed bottom-5 right-5 z-50`).
+    -   Displays a Font Awesome WhatsApp icon.
+    -   Links to `wa.me/` with pre-filled phone number and message.
+    -   Shows a dismissible text bubble ("Connect with us on WhatsApp!") initially.
+    -   Uses `framer-motion` for animations.
+-   **Integration:** Rendered within `Layout.tsx`.
+-   **Props:** None.
+
+---
+
 ## `ScrollToTop.tsx`
 
 A utility component that scrolls the window to the top on route changes.
@@ -204,8 +219,9 @@ Notes on significant changes to page components:
 ### `Home.tsx`
 
 -   **Trusted By:** Section refactored to display a looping CSS marquee of company logos from `public/companies/` instead of static text names.
--   **Trending/Upcoming Courses:** Merged previous "Featured Courses" and removed "Upcoming Courses" logic (from `CourseCategoriesSection`). Now fetches both `featured` and `isUpcoming` courses from Sanity (up to configurable limits) and displays them combined in a single section titled "Trending and Upcoming Courses". Passes a `displayType` prop to `CourseCard` for badge rendering.
--   **Testimonials:** Placeholder content updated to be more relevant to SnowLabs' offerings.
+-   **Trending/Upcoming Courses:** Displays fetched courses in a Swiper carousel on all screen sizes (responsive slides per view, navigation arrows).
+-   **Testimonials:** Now dynamically fetches testimonials marked for homepage display from Sanity (limit 3).
+-   **Resources Details:** Items in this section are now clickable links to respective resource pages.
 -   **Stats:** Updated values in the "Our Impact" section.
 
 ### `CourseDetail.tsx`
@@ -226,4 +242,23 @@ Notes on significant changes to page components:
 ### `RefundPolicy.tsx` (New)
 
 -   New page component created to display the company's refund and reschedule policy.
--   Accessible via the `/refund-policy` route. 
+-   Accessible via the `/refund-policy` route.
+
+### `WebinarsListPage.tsx` (New)
+
+-   Displays a list of available webinars.
+-   Fetches webinar data (title, slug, excerpt, image, date) from Sanity.
+-   Shows webinars as cards linking to the detail page.
+-   Includes Navbar and Footer directly.
+-   Handles loading/error states.
+-   Located at `/resources/webinars`.
+
+### `WebinarDetailPage.tsx` (New)
+
+-   Displays details for a single webinar fetched by slug.
+-   Shows webinar title, presenter, date.
+-   Embeds the YouTube video using `react-player`.
+-   Renders the full description (Portable Text) below the video.
+-   Includes Navbar and Footer directly.
+-   Handles loading/error/not found states.
+-   Located at `/resources/webinars/:slug`. 

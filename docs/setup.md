@@ -20,6 +20,15 @@ This document provides instructions on how to set up the development environment
     ```bash
     npm install
     ```
+    This includes standard React/Vite dependencies as well as specific libraries like:
+    - `react-router-dom` for routing
+    - `framer-motion` for animations
+    - `@portabletext/react` for rendering Sanity rich text
+    - `lucide-react` for icons
+    - `@fortawesome/react-fontawesome`, `@fortawesome/fontawesome-svg-core`, `@fortawesome/free-brands-svg-icons` for specific icons (e.g., WhatsApp)
+    - `swiper` for carousels
+    - `date-fns` for date formatting
+    - `usehooks-ts` for hooks like `useDarkMode`
 
 ## Environment Variables
 
