@@ -5,6 +5,7 @@ import { ArrowLeftIcon, ClockIcon, UsersIcon, StarIcon, TrendingUpIcon, CheckIco
 import AnimatedSection from '../components/AnimatedSection';
 import Button from '../components/Button';
 import ContactForm from '../components/ContactForm';
+import Modal from '../components/Modal';
 import client from '../sanityClient';
 import { PortableText } from '@portabletext/react';
 
@@ -70,6 +71,7 @@ const CourseDetail = () => {
   const [course, setCourse] = useState<SanityCourseDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
 
   useEffect(() => {
     if (!slug) {
@@ -152,6 +154,22 @@ const CourseDetail = () => {
 
   return (
     <div className="w-full pt-28 pb-20 bg-slate-50 dark:bg-gray-950 min-h-screen transition-colors duration-300">
+      {/* Modal for enrollment */}
+      {course && (
+        <Modal
+          isOpen={isEnrollModalOpen}
+          onClose={() => setIsEnrollModalOpen(false)}
+          title={`Enroll in ${course.title}`}
+        >
+          <ContactForm
+            courseId={course._id}
+            courseName={course.title}
+            onClose={() => setIsEnrollModalOpen(false)}
+            isInModal={true}
+          />
+        </Modal>
+      )}
+
       <div className="container mx-auto max-w-6xl px-4">
         <div className="mb-6">
           <nav className="flex" aria-label="Breadcrumb">
@@ -252,7 +270,11 @@ const CourseDetail = () => {
                   <div className="font-bold text-2xl text-blue-600 dark:text-blue-400">
                     ₹{course.price.toFixed(2)}
                   </div>
-                  <Button variant="primary" size="lg">
+                  <Button 
+                    variant="primary" 
+                    size="lg"
+                    onClick={() => setIsEnrollModalOpen(true)}
+                  >
                     Enroll Now
                   </Button>
                 </div>
