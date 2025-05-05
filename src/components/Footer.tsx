@@ -73,10 +73,10 @@ const Footer = () => {
           </div>
           <div className="flex space-x-5 mt-4 md:mt-0">
              {/* Replace # with actual social media links */}
-             <a href="#" aria-label="LinkedIn" className="text-gray-400 hover:text-white transition-colors"><LinkedinIcon size={20} /></a>
-             <a href="#" aria-label="Twitter" className="text-gray-400 hover:text-white transition-colors"><TwitterIcon size={20} /></a>
-             <a href="#" aria-label="Facebook" className="text-gray-400 hover:text-white transition-colors"><FacebookIcon size={20} /></a>
-             <a href="#" aria-label="Instagram" className="text-gray-400 hover:text-white transition-colors"><InstagramIcon size={20} /></a>
+             <a href="https://www.linkedin.com/company/snowlabs-pvt-ltd/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-gray-400 hover:text-white transition-colors"><LinkedinIcon size={20} /></a>
+             <a href="https://x.com/SnowlabsL36432" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-gray-400 hover:text-white transition-colors"><TwitterIcon size={20} /></a>
+             <a href="https://www.facebook.com/profile.php?id=61576203412195" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-gray-400 hover:text-white transition-colors"><FacebookIcon size={20} /></a>
+             <a href="https://www.instagram.com/snowlabs_trainings/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-white transition-colors"><InstagramIcon size={20} /></a>
           </div>
         </div>
 
@@ -90,9 +90,9 @@ const Footer = () => {
             </p>
             {/* Added Contact Info */}
             <div className="space-y-2.5 mb-5">
-              <a href="mailto:training@snowlabs.com" className="flex items-center text-gray-400 hover:text-white transition-colors duration-200">
+              <a href="mailto:training@snowlabs.in" className="flex items-center text-gray-400 hover:text-white transition-colors duration-200">
                 <MailIcon size={14} className="mr-2 text-gray-500 flex-shrink-0" />
-                training@snowlabs.com
+                training@snowlabs.in
               </a>
               <a href="tel:+919211526410" className="flex items-center text-gray-400 hover:text-white transition-colors duration-200">
                 <PhoneIcon size={14} className="mr-2 text-gray-500 flex-shrink-0" />

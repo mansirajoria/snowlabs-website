@@ -226,8 +226,8 @@ const About = () => {
               </div>
               <div className="flex items-center">
                 <MailIcon size={18} className="mr-3 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                <a href="mailto:your-official-email@example.com" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                  your-official-email@example.com
+                <a href="mailto:training@snowlabs.in" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  training@snowlabs.in
                 </a>
               </div>
             </div>

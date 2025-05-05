@@ -35,7 +35,7 @@ const RefundPolicy = () => {
             <p>If a duplicate payment is made, the refund will be processed via the same source (original method of payment) within 10 business days after intimation by the customer.</p>
             
             <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-800 dark:text-gray-100">Refund Procedure</h2>
-            <p>Refund requests can be initiated by sending emails to the SnowLabs team at <a href="mailto:training@snowlabs.com" className="text-blue-600 hover:underline dark:text-blue-400">training@snowlabs.com</a>. A refund request usually takes a maximum of 7 business days to get approved by finance and then within 15 business days to get the payment back into the source account of the learner. We reserve the right to cancel any refund request if it does not follow the prerequisites in this regard or violates the refund rules.</p>
+            <p>Refund requests can be initiated by sending emails to the SnowLabs team at <a href="mailto:training@snowlabs.in" className="text-blue-600 hover:underline dark:text-blue-400">training@snowlabs.in</a>. A refund request usually takes a maximum of 7 business days to get approved by finance and then within 15 business days to get the payment back into the source account of the learner. We reserve the right to cancel any refund request if it does not follow the prerequisites in this regard or violates the refund rules.</p>
           </div>
         </AnimatedSection>
       </div>
