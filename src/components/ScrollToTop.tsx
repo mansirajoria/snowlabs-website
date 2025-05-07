@@ -5,12 +5,15 @@ export default function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // "document.documentElement.scrollTo" is the magic for React Router v6
-    document.documentElement.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "instant", // Optional: Use "auto" to skip smooth scrolling
+    const frameId = requestAnimationFrame(() => {
+      document.documentElement.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "instant",
+      });
     });
+
+    return () => cancelAnimationFrame(frameId);
   }, [pathname]);
 
   return null;

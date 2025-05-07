@@ -5,7 +5,6 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import ContactPopup from './ContactPopup';
 import { useDarkMode } from 'usehooks-ts';
-import ScrollToTop from './ScrollToTop';
 import WhatsAppChatWidget from './WhatsAppChatWidget';
 
 interface LayoutProps {
@@ -28,7 +27,6 @@ const Layout: React.FC<LayoutProps> = ({
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-gray-950 transition-colors duration-300 overflow-hidden">
-      <ScrollToTop />
       <Navbar />
       <main className="flex-grow">{children ? children : <Outlet />}</main>
       <Footer />
